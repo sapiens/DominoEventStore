@@ -13,14 +13,14 @@ namespace Tests
 {
     public class GetEventsAndSnapshotTests
     {
-        private FacadeStore _sut;
+        private StoreFacade _sut;
         private ISpecificDbStorage _storage;
         Fixture _fixture=new Fixture();
 
         public GetEventsAndSnapshotTests()
         {
             _storage = Substitute.For<ISpecificDbStorage>();
-            _sut = new FacadeStore(_storage,Setup.EventStoreSettings);
+            _sut = new StoreFacade(_storage,Setup.EventStoreSettings);
         }
 
         [Fact]

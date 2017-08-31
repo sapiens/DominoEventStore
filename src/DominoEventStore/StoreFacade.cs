@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace DominoEventStore
 {
-  public class FacadeStore:IStoreEvents,IWorkWithSnapshots
+  public class StoreFacade:IStoreEvents,IWorkWithSnapshots
     {
         private readonly ISpecificDbStorage _store;
         private readonly EventStoreSettings _settings;
 
-        public FacadeStore(ISpecificDbStorage store,EventStoreSettings settings)
+        public StoreFacade(ISpecificDbStorage store,EventStoreSettings settings)
         {
             _store = store;
             _settings = settings;
