@@ -54,7 +54,7 @@ namespace DominoEventStore
         /// <returns></returns>
         Task Store(int entityVersion, Guid entityId, object memento, string tenantId = EventStore.DefaultTenant);
 
-        Task Delete(int entityVersion, Guid entityId, string tenantId = EventStore.DefaultTenant);
+        Task Delete(Guid entityId, int entityVersion, string tenantId = EventStore.DefaultTenant);
         Task DeleteAll(Guid entityId, string tenantId = EventStore.DefaultTenant);
     }
 }

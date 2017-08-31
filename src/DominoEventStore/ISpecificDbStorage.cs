@@ -31,5 +31,13 @@ namespace DominoEventStore
         Task ResetStorage();
         Task DeleteTenant(string tenantId);
         Task Store(Snapshot snapshot);
+        /// <summary>
+        /// Delete one or all stored snapshots
+        /// </summary>
+        /// <param name="entityId"></param>
+        /// <param name="tenantId"></param>
+        /// <param name="entityVersion">If missing, it deletes all stored snapshots</param>
+        /// <returns></returns>
+        Task DeleteSnapshot(Guid entityId, string tenantId, int? entityVersion=null);
     }
 }

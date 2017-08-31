@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -64,15 +63,17 @@ namespace DominoEventStore
             
         }
 
-        public Task Delete(int entityVersion, Guid entityId, string tenantId = EventStore.DefaultTenant)
-        {
-            throw new NotImplementedException();
-        }
+        public Task Delete(Guid entityId, int entityVersion, string tenantId = EventStore.DefaultTenant)
+            => _store.DeleteSnapshot(entityId,tenantId,entityVersion);
 
+        /// <summary>
+        /// Deletes all stored snapshots for entity
+        /// </summary>
+        /// <param name="entityId"></param>
+        /// <param name="tenantId"></param>
+        /// <returns></returns>
         public Task DeleteAll(Guid entityId, string tenantId = EventStore.DefaultTenant)
-        {
-            throw new NotImplementedException();
-        }
+            => _store.DeleteSnapshot(entityId, tenantId);
 
     
         public async Task<Optional<EntityEvents>> GetEvents(Action<IConfigureQuery> advancedConfig, CancellationToken? token = null)
