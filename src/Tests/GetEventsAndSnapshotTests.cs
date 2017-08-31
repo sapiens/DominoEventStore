@@ -65,13 +65,8 @@ namespace Tests
             evs.Version.Should().Be(2);            
         }
 
-        private Snapshot CreateSnapshot()
-        {
-            var s = _fixture.Create<Snapshot>();
-            s.SerializedData = Utils.PackSnapshot(_fixture.Create<SomeMemento>());
-            return s;
-
-        }
+        private Snapshot CreateSnapshot() 
+            => new Snapshot(2, Guid.NewGuid(), "_", Utils.PackSnapshot(_fixture.Create<SomeMemento>()), DateTimeOffset.Now);
 
         IEnumerable<Commit> SetupCommits(int count)
         {

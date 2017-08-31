@@ -45,6 +45,7 @@ namespace DominoEventStore
 
         public static string PackSnapshot(object memento)
         {
+            memento.MustNotBeNull();
             return JsonConvert.SerializeObject(memento, SnapshotSerializerSettings);
         }
 

@@ -49,10 +49,10 @@ namespace DominoEventStore
         /// </summary>
         /// <param name="entityVersion">Snapshot represents this version of the entity state</param>
         /// <param name="entityId"></param>
-        /// <param name="snapshot"></param>
+        /// <param name="memento"></param>
         /// <param name="tenantId"></param>
         /// <returns></returns>
-        Task Store(int entityVersion, Guid entityId, object snapshot, string tenantId = EventStore.DefaultTenant);
+        Task Store(int entityVersion, Guid entityId, object memento, string tenantId = EventStore.DefaultTenant);
 
         Task Delete(int entityVersion, Guid entityId, string tenantId = EventStore.DefaultTenant);
         Task DeleteAll(Guid entityId, string tenantId = EventStore.DefaultTenant);
