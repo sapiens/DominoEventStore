@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace DominoEventStore
 {
-  public class StoreFacade:IStoreEvents,IWorkWithSnapshots
-    {
+  public class StoreFacade:IStoreEvents,IWorkWithSnapshots, IAdvancedFeatures
+  {
         private readonly ISpecificDbStorage _store;
         private readonly EventStoreSettings _settings;
 
@@ -54,8 +54,9 @@ namespace DominoEventStore
 
 
         public IWorkWithSnapshots Snapshots => this;
-      
-             
+        public IAdvancedFeatures Advanced => this;
+
+
         public Task Store(int entityVersion, Guid entityId, object memento, string tenantId = EventStore.DefaultTenant)
         {
             var snapshot=new Snapshot(entityVersion,entityId,tenantId,Utils.PackSnapshot(memento),DateTimeOffset.Now);
@@ -84,5 +85,23 @@ namespace DominoEventStore
             var raw = await _store.GetData(config, token ?? CancellationToken.None).ConfigureFalse();
             return raw.HasValue ? new Optional<EntityEvents>(ConvertToEntityEvents(raw.Value)) : Optional<EntityEvents>.Empty;
         }
-    }
+
+      public Task WriteEventsTo(IStoreEvents newStorage, params IRewriteEventData[] converters)
+      {
+          throw new NotImplementedException();
+      }
+
+      public Task ResetStorage() => _store.ResetStorage();
+
+        public Task DeleteTenant(string tenantId)
+        {
+            tenantId.MustNotBe(EventStore.DefaultTenant);
+            return _store.DeleteTenant(tenantId);
+        }
+
+        public Task GenerateReadModel(Func<dynamic, Task> modelUpdater, string tenantId = "", Guid? entityId = null)
+      {
+          throw new NotImplementedException();
+      }
+  }
 }

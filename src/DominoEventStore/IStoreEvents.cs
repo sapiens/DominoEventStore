@@ -39,7 +39,8 @@ namespace DominoEventStore
         /// <returns></returns>
         Task<Optional<EntityEvents>> GetEvents(Action<IConfigureQuery> advancedConfig, CancellationToken? token = null);
         
-        IWorkWithSnapshots Snapshots { get; }        
+        IWorkWithSnapshots Snapshots { get; }
+        IAdvancedFeatures Advanced { get; }
     }
 
     public interface IWorkWithSnapshots
