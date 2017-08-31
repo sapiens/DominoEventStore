@@ -13,15 +13,23 @@ namespace DominoEventStore
             public string Type { get; set; }
             public dynamic Data { get; set; }
         }
-        public static readonly JsonSerializerSettings Settings=new JsonSerializerSettings()
+
+        private static readonly JsonSerializerSettings Settings=new JsonSerializerSettings()
         {
             DateFormatHandling = DateFormatHandling.IsoDateFormat
         };
 
-        public static string PackEvents(params object[] events)
-            => JsonConvert.SerializeObject(events.Select(d=> new EventWrap() { Type = d.GetType().AssemblyQualifiedName, Data = d }));
+        private static readonly JsonSerializerSettings SnapshotSerializerSettings = new JsonSerializerSettings()
+        {
+            Formatting = Formatting.Indented,
+            TypeNameHandling = TypeNameHandling.Objects,
+            DateFormatHandling = DateFormatHandling.IsoDateFormat
+        };
 
-        public static IReadOnlyCollection<object> UnpackEvents(DateTimeOffset commitDate,string data,IDictionary<Type,IMapEventDataToObject> upcasters)
+        public static string PackEvents(params object[] events)
+            => JsonConvert.SerializeObject(events.Select(d=> new EventWrap() { Type = d.GetType().AssemblyQualifiedName, Data = d }),Formatting.Indented);
+
+        public static IReadOnlyCollection<object> UnpackEvents(DateTimeOffset commitDate,string data,IReadOnlyDictionary<Type,IMapEventDataToObject> upcasters)
         {
             var d = JsonConvert.DeserializeObject<EventWrap[]>(data);
             return d.Select(c =>
@@ -29,13 +37,29 @@ namespace DominoEventStore
                 var jo = c.Data as JObject;
                 var type = Type.GetType(c.Type);
                 var des=jo.ToObject(type);
-                var upcast = upcasters.GetValueOrDefault(type);
+                upcasters.TryGetValue(type, out var upcast);
                 return upcast?.Map(c.Data, des, commitDate)?? des;                
             }).ToArray();            
             
         }
 
-        
+        public static string PackSnapshot(object memento)
+        {
+            return JsonConvert.SerializeObject(memento, SnapshotSerializerSettings);
+        }
 
+        public static object UnpackSnapshot(string snapData)
+        {
+            return JsonConvert.DeserializeObject(snapData,SnapshotSerializerSettings);
+        }
+
+    }
+
+    public class EventStoreSettings
+    {
+        Dictionary<Type,IMapEventDataToObject> _eventMappers=new Dictionary<Type, IMapEventDataToObject>();
+
+        public IReadOnlyDictionary<Type, IMapEventDataToObject> EventMappers => _eventMappers;
+        
     }
 }

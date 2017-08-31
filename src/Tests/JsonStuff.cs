@@ -50,7 +50,23 @@ namespace Tests
         }
 
 
+        [Fact]
+        public void pack_unpack_memento()
+        {
+            var memento = new MyMemento() {Age = 23, Data = "Hi"};
+            var data = Utils.PackSnapshot(memento);
+            var unpackSnapshot = Utils.UnpackSnapshot(data);
+            var des = unpackSnapshot as MyMemento;
+            des.ShouldBeEquivalentTo(memento);            
+        }
 
+        public class MyMemento
+        {
+            public int Age { get; set; }
+            public string Data { get; set; }
+            public DateTimeOffset Date { get; set; }=DateTimeOffset.Now;
+
+        }
       public  class MyEvent
         {
             public string Name { get; set; } = "Bula";
