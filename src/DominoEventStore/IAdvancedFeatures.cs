@@ -1,25 +1,35 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DominoEventStore
 {
     public interface IAdvancedFeatures
     {
-        Task WriteEventsTo(IStoreEvents newStorage, params IRewriteEventData[] converters);
-        Task ResetStorage();
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="newStorage"></param>
+        /// <param name="config"></param>
+        /// <returns></returns>
+        void MigrateEventsTo(string name, IStoreEvents newStorage, Action<IConfigMigration> config = null);
+        void ResetStorage();
+
         /// <summary>
         /// You can't delete the default (<see cref="EventStore.DefaultTenant"/>) tenant 
         /// </summary>
         /// <param name="tenantId"></param>
         /// <returns></returns>
-        Task DeleteTenant(string tenantId);
+        void DeleteTenant(string tenantId);
+
         /// <summary>
-        /// Regenerates read model using the provided function
+        /// Regenerates read model using the provided function.
         /// </summary>
+        /// <param name="operationName"></param>
         /// <param name="modelUpdater"></param>
-        /// <param name="tenantId">If not specified it's all tenants. Use <see cref="EventStore.DefaultTenant"/>  for the default tenant</param>
-        /// <param name="entityId">If not specified it's all entities</param>
+        /// <param name="config">By default, all the events will be processed</param>
         /// <returns></returns>
-        Task GenerateReadModel(Func<dynamic, Task> modelUpdater,string tenantId="",Guid? entityId=null);
+        void GenerateReadModel(string operationName, Action<dynamic> modelUpdater, Action<IConfigReadModelGeneration> config = null);
     }
 }

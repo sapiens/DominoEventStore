@@ -86,22 +86,54 @@ namespace DominoEventStore
             return raw.HasValue ? new Optional<EntityEvents>(ConvertToEntityEvents(raw.Value)) : Optional<EntityEvents>.Empty;
         }
 
-      public Task WriteEventsTo(IStoreEvents newStorage, params IRewriteEventData[] converters)
+
+      public void MigrateEventsTo(string name, IStoreEvents newStorage, Action<IConfigMigration> config = null)
       {
-          throw new NotImplementedException();
+          name.MustNotBeEmpty();
+          var conf = new MigrationConfig(name);
+          config?.Invoke(conf);
+            throw new NotImplementedException();
       }
 
-      public Task ResetStorage() => _store.ResetStorage();
+      public void ResetStorage() => _store.ResetStorage();
 
-        public Task DeleteTenant(string tenantId)
+        public void DeleteTenant(string tenantId)
         {
             tenantId.MustNotBe(EventStore.DefaultTenant);
-            return _store.DeleteTenant(tenantId);
+         _store.DeleteTenant(tenantId);
         }
 
-        public Task GenerateReadModel(Func<dynamic, Task> modelUpdater, string tenantId = "", Guid? entityId = null)
+      public void GenerateReadModel(string operationName, Action<dynamic> modelUpdater, Action<IConfigReadModelGeneration> config = null)
       {
-          throw new NotImplementedException();
-      }
+            operationName.MustNotBeEmpty();
+            var conf=new ReadModelGenerationConfig(operationName);
+            config?.Invoke(conf);
+
+          void HandleCommit(Commit commit,Action<dynamic> updater)
+          {
+              var evs = Utils.UnpackEvents(commit.Timestamp, commit.EventData, _settings.EventMappers);
+              foreach (var ev in evs)
+              {
+                    updater((dynamic) ev);                    
+              }
+            }
+          
+         
+            using (var operation = new BatchOperation(_store,conf))
+            {
+                Optional<Commit> commit;
+                do
+                {
+                    commit = operation.GetNextCommit();
+                    if (commit.HasValue)
+                    {
+                        HandleCommit(commit.Value, modelUpdater);
+                    }
+                } while (commit.HasValue);
+
+
+            }
+          
+        }
   }
 }
