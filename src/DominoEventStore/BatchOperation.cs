@@ -6,10 +6,16 @@ namespace DominoEventStore
     public class BatchOperation : IDisposable
     {
         private readonly IStoreBatchProgress _store;
-        private readonly ReadModelGenerationConfig _config;
+        private readonly dynamic _config;
         private ProcessedCommitsCount _processed;
 
         public BatchOperation(IStoreBatchProgress store, ReadModelGenerationConfig config)
+        {
+            _store = store;
+            _config = config;
+            _processed = _store.StartOrContinue(config.Name);
+        }
+         public BatchOperation(IStoreBatchProgress store, MigrationConfig config)
         {
             _store = store;
             _config = config;

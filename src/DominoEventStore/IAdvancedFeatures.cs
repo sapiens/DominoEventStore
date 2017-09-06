@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,7 +16,7 @@ namespace DominoEventStore
         /// <returns></returns>
         void MigrateEventsTo(string name, IStoreEvents newStorage, Action<IConfigMigration> config = null);
         void ResetStorage();
-
+        void ImportCommit(Commit commits);
         /// <summary>
         /// You can't delete the default (<see cref="EventStore.DefaultTenant"/>) tenant 
         /// </summary>

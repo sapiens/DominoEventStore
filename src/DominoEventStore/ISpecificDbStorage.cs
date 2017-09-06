@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,13 +16,14 @@ namespace DominoEventStore
         /// <exception cref="ConcurrencyException"></exception>
         /// <returns></returns>
         Task Append(UnversionedCommit commit);
+
         /// <summary>
         /// Adds the commit as is
         /// </summary>
         /// <param name="commit"></param>
         /// <exception cref="DuplicateCommitException"></exception>
         /// <returns></returns>
-        Task Append(Commit commit);
+        void Import(Commit commit);
 
         Task<Optional<EntityStreamData>> GetData(QueryConfig cfg, CancellationToken token);
         /// <summary>

@@ -1,8 +1,10 @@
+using System;
+
 namespace DominoEventStore
 {
     public interface IRewriteEventData
     {
-        bool CanHandle();
-        object Rewrite(JsonedEvent evnt);
+        Type HandledType { get; }
+        object Rewrite(dynamic jsonData, object deserializedEvent, DateTimeOffset commitDate);
     }
 }
