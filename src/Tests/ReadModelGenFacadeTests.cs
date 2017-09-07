@@ -49,14 +49,4 @@ namespace Tests
 
 
     }
-
-    public class Event1
-    {
-        
-    }
-
-    public class Event2
-    {
-        
-    }
 } 

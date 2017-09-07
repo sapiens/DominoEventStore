@@ -71,7 +71,7 @@ namespace Tests
         IEnumerable<Commit> SetupCommits(int count)
         {
             return Enumerable.Range(1, 2)
-                .Select(i => new Commit("_", Setup.EntityId,Utils.PackEvents(_fixture.Create<SomeEvent>(), _fixture.Create<SomeEvent>()), Guid.NewGuid(),DateTimeOffset.Now, i));                        
+                .Select(i => new Commit("_", Setup.EntityId,Utils.PackEvents(new []{_fixture.Create<SomeEvent>(), _fixture.Create<SomeEvent>()}), Guid.NewGuid(),DateTimeOffset.Now, i));                        
         }
 
     }

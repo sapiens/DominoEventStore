@@ -10,11 +10,11 @@ namespace DominoEventStore
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="name"></param>
         /// <param name="newStorage"></param>
+        /// <param name="name"></param>
         /// <param name="config"></param>
         /// <returns></returns>
-        void MigrateEventsTo(string name, IStoreEvents newStorage, Action<IConfigMigration> config = null);
+        void MigrateEventsTo(IStoreEvents newStorage, string name, Action<IConfigMigration> config = null);
         void ResetStorage();
         void ImportCommit(Commit commits);
         /// <summary>

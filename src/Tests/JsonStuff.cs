@@ -29,7 +29,7 @@ namespace Tests
 
         private static string PackEvents()
         {
-            var ser = Utils.PackEvents(new MyEvent(), new MyEvent() {Name = "Strula"});
+            var ser = Utils.PackEvents(new []{new MyEvent(), new MyEvent() {Name = "Strula"}});
             //_w.WriteLine(s);
             return ser;
         }
@@ -37,7 +37,7 @@ namespace Tests
         [Fact]
         public void pack_unpack_events_with_upcasting()
         {
-            var ser=Utils.PackEvents(new MyEvent(){Age = 23}, new MyEvent(){Name = "Strula",Age = 15});        
+            var ser=Utils.PackEvents(new []{new MyEvent(){Age = 23}, new MyEvent(){Name = "Strula",Age = 15}});        
             var events=Utils.UnpackEvents(DateTimeOffset.Now,ser,new Dictionary<Type, IMapEventDataToObject>()
             {
                 { typeof(MyEvent),new MyEventUpcase()}

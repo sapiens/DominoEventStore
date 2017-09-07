@@ -14,9 +14,10 @@
         /// </summary>
         /// <param name="config"></param>
         /// <param name="count"></param>
-        /// <param name="token"></param>
+     
         /// <returns></returns>
         CommittedEvents GetNextBatch(ReadModelGenerationConfig config,ProcessedCommitsCount count);
+        CommittedEvents GetNextBatch(MigrationConfig config,ProcessedCommitsCount count);
 
         void UpdateProgress(string name, ProcessedCommitsCount processedCommits);
         void MarkOperationAsEnded(string name);

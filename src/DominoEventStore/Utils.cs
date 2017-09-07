@@ -26,7 +26,9 @@ namespace DominoEventStore
             DateFormatHandling = DateFormatHandling.IsoDateFormat
         };
 
-        public static string PackEvents(params object[] events)
+        
+
+        public static string PackEvents(IEnumerable<object> events)
             => JsonConvert.SerializeObject(events.Select(d=> new EventWrap() { Type = d.GetType().AssemblyQualifiedName, Data = d }),Formatting.Indented);
 
         public static IReadOnlyCollection<object> UnpackEvents(DateTimeOffset commitDate,string data,IReadOnlyDictionary<Type,IMapEventDataToObject> upcasters)

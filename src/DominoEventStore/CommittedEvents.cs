@@ -8,6 +8,7 @@ namespace DominoEventStore
     {
         private readonly Commit[] _commits;
 
+        public Commit this[int i] => _commits[i];
         public CommittedEvents(Commit[] commits)
         {
             commits.MustNotBeNull();

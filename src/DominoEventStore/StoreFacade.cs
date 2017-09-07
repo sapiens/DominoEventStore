@@ -92,7 +92,7 @@ namespace DominoEventStore
         }
 
 
-      public void MigrateEventsTo(string name, IStoreEvents newStorage, Action<IConfigMigration> config = null)
+      public void MigrateEventsTo(IStoreEvents newStorage, string name, Action<IConfigMigration> config = null)
       {
           name.MustNotBeEmpty();
           var conf = new MigrationConfig(name);
@@ -191,7 +191,7 @@ namespace DominoEventStore
                 }
             }
 
-            foreach (var kv in _mapps.Where(d => !rez.ContainsKey(d.Key)))
+            foreach (var kv in mapps.Where(d => !rez.ContainsKey(d.Key)))
             {
                 rez.Add(kv.Key,kv.Value);
             }
