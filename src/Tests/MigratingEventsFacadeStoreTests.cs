@@ -47,16 +47,9 @@ namespace Tests
         }
 
 
-        void CreateEvents()
+        public void CreateEvents()
         {
-            var f = new Fixture();
-            _events = new List<object>()
-            {
-                f.Create<Event1>(),
-                f.Create<Event2>(),
-                f.Create<Event1>(),
-                f.Create<Event2>()
-            };
+            _events = Setup.Events();
         }
 
 
@@ -154,24 +147,6 @@ namespace Tests
             {
                 throw new NotImplementedException();
             }
-        }
-    }
-
-    public class RewriteEvent1:ARewriteEvent<Event1>
-    {
-        public override Event1 Rewrite(dynamic jsonData, Event1 deserializedEvent, DateTimeOffset commitDate)
-        {
-            deserializedEvent.Name = "rewritten";
-            return deserializedEvent;
-        }
-    }
-
-    public class UpcastEvent1 : AMapFromEventDataToObject<Event1>
-    {
-        public override Event1 Map(dynamic jsonData, Event1 deserializedEvent, DateTimeOffset commitDate)
-        {
-            deserializedEvent.Nr += 10;
-            return deserializedEvent;
         }
     }
 } 

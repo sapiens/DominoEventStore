@@ -12,16 +12,16 @@ namespace DominoEventStore
         /// Should calculate the version of the entity and use that to detect concurrency problems
         /// </summary>
         /// <param name="commit"></param>
+        /// <param name="eventDeserializer">Used to </param>
         /// <exception cref="DuplicateCommitException"></exception>
         /// <exception cref="ConcurrencyException"></exception>
         /// <returns></returns>
-        Task Append(UnversionedCommit commit);
+        Task Append(UnversionedCommit commit, Func<Commit, IEnumerable<object>> eventDeserializer);
 
         /// <summary>
-        /// Adds the commit as is
+        /// Adds the commit as is. Duplicates should be ignored
         /// </summary>
-        /// <param name="commit"></param>
-        /// <exception cref="DuplicateCommitException"></exception>
+        /// <param name="commit"></param>        
         /// <returns></returns>
         void Import(Commit commit);
 

@@ -34,7 +34,7 @@ namespace DominoEventStore
             if (events.IsNullOrEmpty()) return Task.CompletedTask;
 
             var commit=new UnversionedCommit(tenantId,entityId,Utils.PackEvents(events),commitId,DateTimeOffset.Now);
-            return _store.Append(commit);
+            return _store.Append(commit,c=>Utils.UnpackEvents(c.Timestamp,c.EventData,_settings.EventMappers));
         }
 
         public Task<Optional<EntityEvents>> GetEvents(Guid entityId, string tenantId = EventStore.DefaultTenant,

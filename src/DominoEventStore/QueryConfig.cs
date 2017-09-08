@@ -4,7 +4,7 @@ namespace DominoEventStore
 {
     public class QueryConfig:IConfigureQuery,IConfigureQueryByDate
     {
-        public string TenantId { get; set; }
+        public string TenantId { get; set; } = EventStore.DefaultTenant;
         public Guid? EntityId { get; set; }
 
         /// <summary>

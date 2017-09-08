@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using DominoEventStore;
+using Ploeh.AutoFixture;
 
 namespace Tests
 {
@@ -29,6 +31,28 @@ namespace Tests
         public static IEnumerable<object> GetEvents(this Commit commit, IReadOnlyDictionary<Type, IMapEventDataToObject> upc)
         {
             return Utils.UnpackEvents(commit.Timestamp, commit.EventData, upc);
+        }
+
+        public static UnversionedCommit UnversionedCommit(string tenantId = "_", Guid? guid = null)
+            =>
+                new UnversionedCommit(tenantId, guid ?? Guid.NewGuid(), Utils.PackEvents(Events(1)), Guid.NewGuid(),
+                    DateTimeOffset.Now);
+        
+
+        public static List<object> Events(int count=4)
+        {
+            var f = new Fixture();
+            return Enumerable.Range(1, count)
+                .Select(i => i % 2 == 1 ? (object)f.Create<Event1>() : f.Create<Event2>())
+                .ToList();          
+        }
+
+        public static Snapshot Snapshot(int ver,Guid entity,string tenant="_")
+        => new Snapshot(ver,entity,tenant,Utils.PackSnapshot(new Fixture().Create<SomeMemento>()),DateTimeOffset.Now);
+
+        public static Func<Commit, IEnumerable<object>> EventDeserializerWIthoutUpcasting()
+        {
+            return c=>c.GetEvents(ImmutableDictionary<Type, IMapEventDataToObject>.Empty);
         }
     }
 }
