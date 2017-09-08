@@ -24,9 +24,9 @@ namespace Tests
             var commit1 = Setup.UnversionedCommit();
             var commit2 = Setup.UnversionedCommit(guid:commit1.EntityId);
             var commit3 = Setup.UnversionedCommit();
-            await _store.Append(commit1, Setup.EventDeserializerWIthoutUpcasting());
-            await _store.Append(commit2, Setup.EventDeserializerWIthoutUpcasting());
-            await _store.Append(commit3, Setup.EventDeserializerWIthoutUpcasting());
+            await _store.Append(commit1);
+            await _store.Append(commit2);
+            await _store.Append(commit3);
             var data = await _store.GetData(Config(c=>c.OfEntity(commit1.EntityId)), CancellationToken.None);
             var commits = data.Value.Commits.ToArray();
             commits.Length.Should().Be(2);
@@ -44,10 +44,10 @@ namespace Tests
             var commit3 = Setup.UnversionedCommit(guid: commit1.EntityId);
             var snapshot = Setup.Snapshot(2, commit1.EntityId);
 
-            await _store.Append(commit1, Setup.EventDeserializerWIthoutUpcasting());
-            await _store.Append(commit2, Setup.EventDeserializerWIthoutUpcasting());
+            await _store.Append(commit1);
+            await _store.Append(commit2);
             await _store.Store(snapshot);
-            await _store.Append(commit3, Setup.EventDeserializerWIthoutUpcasting());
+            await _store.Append(commit3);
 
             var data = await _store.GetData(Config(c => c.OfEntity(commit1.EntityId).IncludeSnapshots(true)), CancellationToken.None);
             var commits = data.Value.Commits.ToArray();
@@ -65,8 +65,8 @@ namespace Tests
             var commit2 = Setup.UnversionedCommit(guid: commit1.EntityId);
             
             var snapshot = Setup.Snapshot(2, commit1.EntityId);
-            await _store.Append(commit1, Setup.EventDeserializerWIthoutUpcasting());
-            await _store.Append(commit2, Setup.EventDeserializerWIthoutUpcasting());
+            await _store.Append(commit1);
+            await _store.Append(commit2);
             await _store.Store(snapshot);
             
 
@@ -78,39 +78,26 @@ namespace Tests
         }
 
         [Fact]
-        public async Task duplicate_commit_throws_and_returns_committed_events()
+        public async Task duplicate_commit_returns_stored_commit()
         {
             var commit1 = Setup.UnversionedCommit();
-            await _store.Append(commit1, Setup.EventDeserializerWIthoutUpcasting());
+            await _store.Append(commit1);
 
-            try
-            {
-                await _store.Append(commit1, Setup.EventDeserializerWIthoutUpcasting());
-                throw new InvalidOperationException();
-            }
-            catch (DuplicateCommitException ex)
-            {
-                ex.CommitId.Should().Be(commit1.CommitId);
-                var ev = new Commit(1, commit1).GetEvents(ImmutableDictionary<Type, IMapEventDataToObject>.Empty);
-                ex.Events.Count.Should().Be(1);
-                ex.Events.First().CastAs<Event1>().ShouldBeEquivalentTo(ev.First().CastAs<Event1>());
-            }
-            catch 
-            {
-                throw new InvalidOperationException();
-            }
+            var result=await _store.Append(commit1);
+            result.WasSuccessful.Should().BeFalse();
+            result.DuplicateCommit.ShouldBeEquivalentTo(new Commit(1,commit1));            
         }
 
-        [Fact]
-        public async Task concurrency_Exception_when_trying_to_commit_with_an_existing_version()
-        {
-            var commit = Setup.UnversionedCommit();
-            var comm2 = Setup.UnversionedCommit(guid: commit.CommitId);
-            await _store.Append(commit);
-            _store.Import(new Commit(2,commit));
+        //[Fact]
+        //public async Task concurrency_Exception_when_trying_to_commit_with_an_existing_version()
+        //{
+        //    var commit = Setup.UnversionedCommit();
+        //    var comm2 = Setup.UnversionedCommit(guid: commit.CommitId);
+        //    await _store.Append(commit);
+        //    _store.Import(new Commit(2,commit));
             
 
-        }
+        //}
 
         QueryConfig Config(Action<IConfigureQuery> cfg)
         {

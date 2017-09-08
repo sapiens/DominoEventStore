@@ -26,15 +26,17 @@ namespace DominoEventStore
         public Task Append(Guid entityId, Guid commitId, params object[] events)
             => Append(EventStore.DefaultTenant, entityId, commitId, events);
 
-        public Task Append(string tenantId, Guid entityId, Guid commitId, params object[] events)
+        public async Task Append(string tenantId, Guid entityId, Guid commitId, params object[] events)
         {
             tenantId.MustNotBeEmpty();
             entityId.MustNotBeDefault();
             commitId.MustNotBeDefault();
-            if (events.IsNullOrEmpty()) return Task.CompletedTask;
+            if (events.IsNullOrEmpty()) return ;
 
             var commit=new UnversionedCommit(tenantId,entityId,Utils.PackEvents(events),commitId,DateTimeOffset.Now);
-            return _store.Append(commit,c=>Utils.UnpackEvents(c.Timestamp,c.EventData,_settings.EventMappers));
+            var rez= await _store.Append(commit);
+            if (rez.WasSuccessful) return;
+            throw new DuplicateCommitException(commitId,Utils.UnpackEvents(commit.Timestamp,commit.EventData,_settings.EventMappers));
         }
 
         public Task<Optional<EntityEvents>> GetEvents(Guid entityId, string tenantId = EventStore.DefaultTenant,

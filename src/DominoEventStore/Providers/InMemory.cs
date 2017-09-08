@@ -38,7 +38,7 @@ namespace DominoEventStore.Providers
 
         List<Commit> _commits=new List<Commit>();
 
-        public Task Append(UnversionedCommit commit,Func<Commit,IEnumerable<object>> eventDeserializer)
+        public Task<AppendResult> Append(UnversionedCommit commit)
         {
             lock (_sync)
             {
@@ -47,13 +47,13 @@ namespace DominoEventStore.Providers
                 var dup = all.FirstOrDefault(d => d.CommitId == commit.CommitId);
                 if (dup != null)
                 {
-                    throw new DuplicateCommitException(commit.CommitId,eventDeserializer(dup));
+                    return Task.FromResult(new AppendResult(dup));
                 }
                 var max=!all.Any()?0:all.Max(d => d.Version);
                 var c=new Commit(max+1,commit);
                 _commits.Add(c);
             }
-            return Task.CompletedTask;
+            return Task.FromResult(AppendResult.Ok);
         }
 
         public void Import(Commit commit)
