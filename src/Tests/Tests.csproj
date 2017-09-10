@@ -6,6 +6,9 @@
     <OutputType>Library</OutputType>
     <StartupObject />
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;DEBUG;NETCOREAPP2_0; IN_MEMORY</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="AutoFixture" Version="3.50.6" />
     <PackageReference Include="FluentAssertions" Version="4.19.4" />

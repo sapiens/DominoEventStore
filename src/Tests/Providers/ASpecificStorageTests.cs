@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Dynamic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -88,22 +89,191 @@ namespace Tests
             result.DuplicateCommit.ShouldBeEquivalentTo(new Commit(1,commit1));            
         }
 
-        //[Fact]
-        //public async Task concurrency_Exception_when_trying_to_commit_with_an_existing_version()
-        //{
-        //    var commit = Setup.UnversionedCommit();
-        //    var comm2 = Setup.UnversionedCommit(guid: commit.CommitId);
-        //    await _store.Append(commit);
-        //    _store.Import(new Commit(2,commit));
-            
+#if !IN_MEMORY
+          [Fact]
+        public async Task concurrency_Exception_when_trying_to_commit_with_an_existing_version()
+        {
+            var commit = Setup.UnversionedCommit();
+            var comm2 = Setup.UnversionedCommit(guid: commit.CommitId);
+            await _store.Append(commit);
+            _store.Import(new Commit(2, commit));
+            try
+            {
+                await _store.Append(Setup.UnversionedCommit(guid: commit.CommitId));
+                throw new Exception();
+            }
+            catch (ConcurrencyException ex)
+            {
+                
+            }
+            catch
+            {
+                throw new Exception();
+            }
 
-        //}
+        }
+#endif
+
 
         QueryConfig Config(Action<IConfigureQuery> cfg)
         {
             var c=new QueryConfig();
             cfg(c);
             return c;
+        }
+
+        [Fact]
+        public async Task existing_snapshot_with_same_entity_version_is_replaced()
+        {
+            var snap = Setup.Snapshot(3, Guid.NewGuid());
+            await _store.Store(snap);
+
+            var snap1 = Setup.Snapshot(3, snap.EntityId);
+            await _store.Store(snap1);
+
+            var get = await _store.GetData(Config(c => c.OfEntity(snap.EntityId).IncludeSnapshots(true)),
+                CancellationToken.None);
+            var mem2 = Utils.UnpackSnapshot(get.Value.LatestSnapshot.Value.SerializedData) as SomeMemento;
+            var mem1 = Utils.UnpackSnapshot(snap1.SerializedData) as SomeMemento;
+            mem2.Name.Should().Be(mem1.Name);
+            mem2.IsOpen.Should().Be(mem1.IsOpen);            
+
+
+        }
+
+        [Fact]
+        public async Task only_most_recent_snapshot_is_used()
+        {
+            var snap = Setup.Snapshot(3, Guid.NewGuid());
+            await _store.Store(snap);
+
+            var snap1 = Setup.Snapshot(4, snap.EntityId);
+            await _store.Store(snap1);
+
+            var get = await _store.GetData(Config(c => c.OfEntity(snap.EntityId).IncludeSnapshots(true)),
+                CancellationToken.None);
+            var mem2 = Utils.UnpackSnapshot(get.Value.LatestSnapshot.Value.SerializedData) as SomeMemento;
+            var mem1 = Utils.UnpackSnapshot(snap1.SerializedData) as SomeMemento;
+            mem2.Name.Should().Be(mem1.Name);
+            mem2.IsOpen.Should().Be(mem1.IsOpen);            
+        }
+
+        [Fact]
+        public async Task delete_snapshot()
+        {
+            var snap = Setup.Snapshot(3, Guid.NewGuid());
+            await _store.Append(Setup.UnversionedCommit(snap.TenantId, snap.EntityId));
+            await _store.Store(snap);
+            var get = await _store.GetData(Config(c => c.OfEntity(snap.EntityId).IncludeSnapshots(true)),
+                CancellationToken.None);
+            get.Value.LatestSnapshot.Value.ShouldBeEquivalentTo(snap);
+            await _store.DeleteSnapshot(snap.EntityId, snap.TenantId);
+            get = await _store.GetData(Config(c => c.OfEntity(snap.EntityId).IncludeSnapshots(true)),
+                CancellationToken.None);
+            get.Value.LatestSnapshot.IsEmpty.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task delete_specific_snapshot()
+        {
+            var snap = Setup.Snapshot(2, Guid.NewGuid());
+            await _store.Append(Setup.UnversionedCommit(snap.TenantId, snap.EntityId));
+            await _store.Store(snap);
+            var snap1 = Setup.Snapshot(3, snap.EntityId, snap.TenantId);
+            await _store.Store(snap1);
+            
+            await _store.DeleteSnapshot(snap.EntityId, snap.TenantId,snap.Version);
+            var get = await _store.GetData(Config(c => c.OfEntity(snap.EntityId).IncludeSnapshots(true)),
+                CancellationToken.None);
+            get.Value.LatestSnapshot.Value.ShouldBeEquivalentTo(snap1);
+
+            await _store.DeleteSnapshot(snap.EntityId, snap.TenantId, snap1.Version);
+            get = await _store.GetData(Config(c => c.OfEntity(snap.EntityId).IncludeSnapshots(true)),
+                CancellationToken.None);
+            get.Value.LatestSnapshot.IsEmpty.Should().BeTrue();
+        }
+
+        [Fact]
+        public void batch_start_returns_0()
+        {
+            _store.StartOrContinue("test").Value.Should().Be(0);
+        }
+
+        [Fact]
+        public void batch_continue_returns_savepoint()
+        {
+            _store.StartOrContinue("test");
+            _store.UpdateProgress("test",5);
+            _store.StartOrContinue("test").Value.Should().Be(5);
+        }
+
+        [Fact]
+        public void batch_ends()
+        {
+            _store.StartOrContinue("test");
+            _store.UpdateProgress("test", 5);
+            _store.MarkOperationAsEnded("test");
+            _store.StartOrContinue("test").Value.Should().Be(0);
+        }
+
+        [Fact]
+        public async Task batch_get_next_for_read_model_all_events()
+        {
+            var entity = Guid.NewGuid();
+            await _store.Append(Setup.UnversionedCommit(guid: entity));
+            await _store.Append(Setup.UnversionedCommit(guid: entity));
+            await _store.Append(Setup.UnversionedCommit("1"));
+
+            var rm=new ReadModelGenerationConfig("test");
+            
+            var rez=_store.GetNextBatch(rm, 0);
+            rez.IsEmpty.Should().BeFalse();
+            var first = rez.GetNext().Value;
+            first.EntityId.Should().Be(entity);
+            first.TenantId.Should().Be("_");
+            first.Version.Should().Be(1);
+
+            var second = rez.GetNext().Value;
+            second.EntityId.Should().Be(entity);
+            second.TenantId.Should().Be("_");
+            second.Version.Should().Be(2);
+
+            var third = rez.GetNext().Value;
+            third.EntityId.Should().NotBe(entity);
+            third.TenantId.Should().Be("1");
+            third.Version.Should().Be(1);
+
+            rez.GetNext().IsEmpty.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task batch_get_next_for_migration_all_events()
+        {
+            var entity = Guid.NewGuid();
+            await _store.Append(Setup.UnversionedCommit(guid: entity));
+            await _store.Append(Setup.UnversionedCommit(guid: entity));
+            await _store.Append(Setup.UnversionedCommit("1"));
+
+            var rm=new MigrationConfig("test");
+            
+            var rez=_store.GetNextBatch(rm, 0);
+            rez.IsEmpty.Should().BeFalse();
+            var first = rez.GetNext().Value;
+            first.EntityId.Should().Be(entity);
+            first.TenantId.Should().Be("_");
+            first.Version.Should().Be(1);
+
+            var second = rez.GetNext().Value;
+            second.EntityId.Should().Be(entity);
+            second.TenantId.Should().Be("_");
+            second.Version.Should().Be(2);
+
+            var third = rez.GetNext().Value;
+            third.EntityId.Should().NotBe(entity);
+            third.TenantId.Should().Be("1");
+            third.Version.Should().Be(1);
+
+            rez.GetNext().IsEmpty.Should().BeTrue();
         }
     }
 }

@@ -10,29 +10,38 @@ namespace DominoEventStore.Providers
     {
         object _sync=new object();
 
+        Dictionary<string,int> _batch=new Dictionary<string, int>();
+
         public ProcessedCommitsCount StartOrContinue(string name)
         {
-            throw new NotImplementedException();
+            return _batch.GetValueOrCreate(name,()=>0);
         }
 
         public CommittedEvents GetNextBatch(ReadModelGenerationConfig config, ProcessedCommitsCount count)
         {
-            throw new NotImplementedException();
+            IEnumerable<Commit> all=_commits;
+            if (!config.TenantId.IsNullOrEmpty()) all = all.Where(d => d.TenantId == config.TenantId);
+            if (config.EntityId.HasValue) all = all.Where(d => d.EntityId == config.EntityId.Value);
+            all = all.OrderBy(d => d.Timestamp);
+            return new CommittedEvents(all.ToArray());
         }
 
         public CommittedEvents GetNextBatch(MigrationConfig config, ProcessedCommitsCount count)
         {
-            throw new NotImplementedException();
+            IEnumerable<Commit> all = _commits;
+            if (!config.TenantId.IsNullOrEmpty()) all = all.Where(d => d.TenantId == config.TenantId);            
+            all = all.OrderBy(d => d.Timestamp);
+            return new CommittedEvents(all.ToArray());
         }
 
         public void UpdateProgress(string name, ProcessedCommitsCount processedCommits)
         {
-            throw new NotImplementedException();
+            _batch[name] = processedCommits;
         }
 
         public void MarkOperationAsEnded(string name)
         {
-            throw new NotImplementedException();
+            _batch.Remove(name);
         }
 
 
@@ -81,7 +90,9 @@ namespace DominoEventStore.Providers
                             return true;
                         }).Where(d => d.Version >= cfg.VersionStart && d.Version <= cfg.VersionEnd)
                         .Where(d => d.Timestamp >= (cfg.DateStart ?? DateTimeOffset.MinValue))
-                        .Where(d => d.Timestamp <= (cfg.DateEnd ?? DateTimeOffset.MaxValue)).ToArray();
+                        .Where(d => d.Timestamp <= (cfg.DateEnd ?? DateTimeOffset.MaxValue))
+                        .OrderBy(d=>d.Version)
+                        .ToArray();
             }
 
             return Task.FromResult(esd.ToOptional());
@@ -92,7 +103,7 @@ namespace DominoEventStore.Providers
             cfg.EntityId.MustNotBeDefault();
             lock (_sync)
             {
-                var all = _snapshots.GetValueOrDefault(cfg.EntityId.Value).ToArray();
+                var all = _snapshots.GetValueOrDefault(cfg.EntityId.Value,new List<Snapshot>()).ToArray();
                 if (!all.Any()) return Optional<Snapshot>.Empty;
                 var snapshot = all.OrderByDescending(d => d.Version).FirstOrDefault();
                 return snapshot==null?Optional<Snapshot>.Empty:new Optional<Snapshot>(snapshot);
@@ -135,7 +146,22 @@ namespace DominoEventStore.Providers
 
         public Task DeleteSnapshot(Guid entityId, string tenantId, int? entityVersion = null)
         {
-            throw new NotImplementedException();
+            lock (_sync)
+            {
+               
+                if (entityVersion == null)
+                {
+                    _snapshots.Remove(entityId);
+
+                }
+                else
+                {
+                     var snaps = _snapshots.GetValueOrDefault(entityId, new List<Snapshot>());
+                     snaps.RemoveAll(d => d.Version == entityVersion);
+                }
+            }
+            
+            return Task.CompletedTask;
         }
     }
 }
