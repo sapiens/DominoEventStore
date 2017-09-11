@@ -24,11 +24,17 @@ namespace DominoEventStore
         void Import(Commit commit);
 
         Task<Optional<EntityStreamData>> GetData(QueryConfig cfg, CancellationToken token);
+
         /// <summary>
-        /// Creates the tables in the specified/default schema
+        /// Creates the tables in the specified/default schema. If they already exist, ignore them
         /// </summary>
-        /// <param name="schema"></param>
-        void InitStorage(string schema = null);
+        void InitStorage();
+
+        /// <summary>
+        /// Empty means default schema
+        /// </summary>
+        string Schema { get; set; }
+
         void ResetStorage();
         void DeleteTenant(string tenantId);
 

@@ -26,6 +26,8 @@ namespace DominoEventStore.Providers
             return new CommittedEvents(all.ToArray());
         }
 
+        public string Schema { get; set; } = "";
+
         public CommittedEvents GetNextBatch(MigrationConfig config, ProcessedCommitsCount count)
         {
             IEnumerable<Commit> all = _commits;
@@ -110,7 +112,7 @@ namespace DominoEventStore.Providers
             }
         }
 
-        public void InitStorage(string schema = null)
+        public void InitStorage()
         {
           
         }
