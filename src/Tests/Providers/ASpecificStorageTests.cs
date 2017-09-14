@@ -14,10 +14,12 @@ namespace Tests
     public abstract class ASpecificStorageTests
     {
         private readonly ISpecificDbStorage _store;
+        
 
         protected ASpecificStorageTests(ISpecificDbStorage store)
         {
             _store = store;
+            store.InitStorage();
         }
         [Fact]
         public async Task append_then_get_events_no_snapshot()

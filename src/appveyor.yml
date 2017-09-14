@@ -1,0 +1,35 @@
+version: 1.0.{build}
+
+skip_non_tags: true
+
+image: Previous Visual Studio 2017
+
+configuration: Release
+
+dotnet_csproj:
+
+  patch: true
+
+  file: '**\*.csproj'
+
+  version: '{version}'
+
+  package_version: '{version}'
+
+services: mssql2016
+
+before_build:
+
+- cmd: dotnet restore src
+
+build:
+
+  verbosity: minimal
+
+test_script:
+
+- cmd: >-
+
+    cd src/tests
+
+    dotnet xunit

@@ -1,9 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Data.SqlClient;
 using System.Linq;
 using DominoEventStore;
+using DominoEventStore.Providers;
 using Ploeh.AutoFixture;
+using SqlFu;
+using SqlFu.Configuration;
+using SqlFu.Providers;
+using SqlFu.Providers.SqlServer;
+using Utils = DominoEventStore.Utils;
 
 namespace Tests
 {
@@ -13,6 +20,36 @@ namespace Tests
         {
             
         };
+
+        public const string TestSchema = "guest";
+
+       public static ISpecificDbStorage GetDbFactory<T>() 
+        {
+            var provs=new Dictionary<Type,ISpecificDbStorage>()
+            {
+                {
+                    typeof(SqlServerTests)
+                    ,new SqlServerProvider(SqlFuManager.Config.CreateFactory<IEventStoreSqlFactory>(
+                        new SqlServer2012Provider(SqlClientFactory.Instance.CreateConnection),SqlServerTests.ConnectionString))
+                }
+            };
+
+            var option = provs[typeof(T)];
+            option.Schema = "guest";
+            SqlFuManager.Config.ConfigureTableForPoco<Commit>(d =>
+            {
+                d.Table=new TableName(ASqlDbProvider.CommitsTable,TestSchema);
+                d.IdentityColumn = "Id";
+            });
+            SqlFuManager.Config.ConfigureTableForPoco<Snapshot>(d =>
+            {
+                d.Table=new TableName(ASqlDbProvider.SnapshotsTable,TestSchema);
+                d.IdentityColumn = "Id";
+            });
+            return option;
+        }
+
+        public static readonly bool IsAppVeyor = Environment.GetEnvironmentVariable("Appveyor")?.ToUpperInvariant() == "TRUE";
 
         public static readonly Guid EntityId = Guid.NewGuid();
 
@@ -55,4 +92,7 @@ namespace Tests
             return c=>c.GetEvents(ImmutableDictionary<Type, IMapEventDataToObject>.Empty);
         }
     }
+
+  
+
 }

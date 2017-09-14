@@ -25,10 +25,10 @@ namespace DominoEventStore
             
         }
 
-        public Guid CommitId { get; private set; }
-        public DateTimeOffset Timestamp { get; private set; }
-        public string TenantId { get; private set; }
-        public Guid EntityId { get; private set; }
-        public string EventData { get; private set; }
+        public Guid CommitId { get; protected set; }
+        public DateTimeOffset Timestamp { get; protected set; }
+        public string TenantId { get; protected set; }
+        public Guid EntityId { get; protected set; }
+        public string EventData { get; protected set; }
     }
 }

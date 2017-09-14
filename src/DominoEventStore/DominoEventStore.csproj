@@ -6,5 +6,7 @@
   <ItemGroup>
     <PackageReference Include="CavemanTools" Version="4.10.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="SqlFu" Version="3.4.1.11" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.4.0" />
   </ItemGroup>
 </Project>
