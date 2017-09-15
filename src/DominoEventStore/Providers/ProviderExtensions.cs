@@ -9,7 +9,7 @@ namespace DominoEventStore.Providers
             var c=new SqlFuConfiguration();
             config(c);
             c.Configure();
-            store.WithProvider(ASqlDbProvider.CreateFor(c.ProviderId));
+            store.WithProvider(ASqlDbProvider.CreateFor(c.ProviderId,c.Schema));
             return store;
         }
 

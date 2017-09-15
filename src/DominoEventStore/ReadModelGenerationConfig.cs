@@ -11,6 +11,9 @@ namespace DominoEventStore
         /// </summary>
         public int BatchSize { get; set; } = 1000;
 
+        /// <summary>
+        /// Can be empty
+        /// </summary>
         public string TenantId { get; set; }
 
         public Guid? EntityId { get; set; }

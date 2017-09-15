@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data.Common;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using SqlFu;
@@ -13,11 +14,12 @@ namespace DominoEventStore.Providers
 
         public const string CommitsTable = "ES_Commits";
         public const string SnapshotsTable = "ES_Snapshots";
-        public static ASqlDbProvider CreateFor(string providerId)
+        public const string BatchTable = "ES_Batch";
+        public static ASqlDbProvider CreateFor(string providerId,string schema)
         {
             switch (providerId)
             {
-                case SqlServer2012Provider.Id: return new SqlServerProvider(SqlFuManager.GetDbFactory<IEventStoreSqlFactory>());
+                case SqlServer2012Provider.Id: return new SqlServerProvider(SqlFuManager.GetDbFactory<IEventStoreSqlFactory>()){Schema = schema};
             }
             throw new NotSupportedException();
         }
@@ -30,27 +32,69 @@ namespace DominoEventStore.Providers
         }
         public ProcessedCommitsCount StartOrContinue(string name)
         {
-            throw new NotImplementedException();
+            using (var db = _db.Create())
+            {
+                var skip = db.QueryValue(q =>
+                    q.From<BatchProgress>().Where(d => d.Name == name).Select(d => d.Skip).MapTo<long?>());
+                if (skip == null)
+                {
+                    skip = 0;
+                    db.Insert(new BatchProgress() { Name = name });
+                }
+                return new ProcessedCommitsCount((int)skip.Value);
+            }
         }
 
         public CommittedEvents GetNextBatch(ReadModelGenerationConfig config, ProcessedCommitsCount count)
         {
-            throw new NotImplementedException();
+            using (var db = _db.Create())
+            {
+                var all = db.QueryAs(q => q
+                    .FromAnonymous(new {Id = 1, TenantId = "", EntityId = Guid.Empty},
+                        o => o.SetTableName(CommitsTable, Schema)).Where(d => true)
+                    .AndIf(() => config.EntityId.HasValue, d => d.EntityId == config.EntityId.Value)
+                    .AndIf(() => !config.TenantId.IsNullOrEmpty(), d => d.TenantId == config.TenantId)
+                    .OrderBy(d => d.Id)
+                    .Limit(config.BatchSize, count.Value)
+                    .SelectAll(useAsterisk: true).MapTo<Commit>()
+                );
+                return new CommittedEvents(all.ToArray());
+            }
         }
 
         public CommittedEvents GetNextBatch(MigrationConfig config, ProcessedCommitsCount count)
         {
-            throw new NotImplementedException();
+            using (var db = _db.Create())
+            {
+                var all = db.QueryAs(q => q
+                    .FromAnonymous(new { Id = 1, TenantId = "", EntityId = Guid.Empty },
+                        o => o.SetTableName(CommitsTable, Schema)).Where(d => true)
+                    
+                    .AndIf(() => !config.TenantId.IsNullOrEmpty(), d => d.TenantId == config.TenantId)
+                    .OrderBy(d => d.Id)
+                    .Limit(config.BatchSize, count.Value)
+                    .SelectAll(useAsterisk: true).MapTo<Commit>()
+                );
+                return new CommittedEvents(all.ToArray());
+            }
         }
 
         public void UpdateProgress(string name, ProcessedCommitsCount processedCommits)
         {
-            throw new NotImplementedException();
+            using (var db = _db.Create())
+            {
+                db.Update<BatchProgress>().Set(d => d.Skip, processedCommits.Value)
+                    .Where(d => d.Name == name).Execute();
+            }
         }
+    
 
         public void MarkOperationAsEnded(string name)
         {
-            throw new NotImplementedException();
+            using (var db = _db.Create())
+            {
+                db.DeleteFrom<BatchProgress>(d => d.Name == name);
+            }
         }
 
         public async Task<AppendResult> Append(UnversionedCommit commit)

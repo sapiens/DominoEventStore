@@ -7,7 +7,7 @@ namespace DominoEventStore.Providers
     public interface IConfigureSqlFu
     {
         IConfigureSqlFu IntegrateWith(SqlFuConfig config);
-        IConfigureSqlFu WithMSSql(string cnx, Func<DbConnection> factory);
+        IConfigureSqlFu WithMSSql(string cnx, Func<DbConnection> factory, string schema = null);
 
     }
 }

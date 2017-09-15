@@ -64,21 +64,16 @@ CREATE UNIQUE NONCLUSTERED INDEX [IX_SNapshots_Ver] ON [{schema}].[{SnapshotsTab
 	[Version] ASC
 )
 ;
+CREATE TABLE [{schema}].[{BatchTable}](
+	[Name] [varchar](50) NOT NULL,
+	[Skip] [bigint] NOT NULL
+) ON [PRIMARY]
 end
 "
 ;
         }
     }
 
-    public class SqliteProvider : ASqlDbProvider
-    {
-        protected override string GetInitStorageSql(string schema)
-        {
-            return "";
-        }
-
-        public SqliteProvider(IEventStoreSqlFactory db) : base(db)
-        {
-        }
-    }
+   
+ 
 }

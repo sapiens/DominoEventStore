@@ -33,7 +33,7 @@ namespace Tests
                         new SqlServer2012Provider(SqlClientFactory.Instance.CreateConnection),SqlServerTests.ConnectionString))
                 }
             };
-
+            SqlFuManager.UseLogManager();
             var option = provs[typeof(T)];
             option.Schema = "guest";
             SqlFuManager.Config.ConfigureTableForPoco<Commit>(d =>
@@ -46,6 +46,8 @@ namespace Tests
                 d.Table=new TableName(ASqlDbProvider.SnapshotsTable,TestSchema);
                 d.IdentityColumn = "Id";
             });
+            SqlFuManager.Config.ConfigureTableForPoco<BatchProgress>(d =>
+                d.Table = new TableName(ASqlDbProvider.BatchTable, TestSchema));
             return option;
         }
 

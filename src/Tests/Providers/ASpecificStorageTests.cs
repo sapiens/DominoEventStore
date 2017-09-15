@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Tests
 {
-    public abstract class ASpecificStorageTests
+    public abstract class ASpecificStorageTests:IDisposable
     {
         private readonly ISpecificDbStorage _store;
         
@@ -198,24 +198,26 @@ namespace Tests
         [Fact]
         public void batch_start_returns_0()
         {
-            _store.StartOrContinue("test").Value.Should().Be(0);
+            _store.StartOrContinue(Guid.NewGuid().ToString()).Value.Should().Be(0);
         }
 
         [Fact]
         public void batch_continue_returns_savepoint()
         {
-            _store.StartOrContinue("test");
-            _store.UpdateProgress("test",5);
-            _store.StartOrContinue("test").Value.Should().Be(5);
+            var test =Guid.NewGuid().ToString();
+            _store.StartOrContinue(test);
+            _store.UpdateProgress(test,5);
+            _store.StartOrContinue(test).Value.Should().Be(5);
         }
 
         [Fact]
         public void batch_ends()
         {
-            _store.StartOrContinue("test");
-            _store.UpdateProgress("test", 5);
-            _store.MarkOperationAsEnded("test");
-            _store.StartOrContinue("test").Value.Should().Be(0);
+            var test = Guid.NewGuid().ToString();
+            _store.StartOrContinue(test);
+            _store.UpdateProgress(test, 5);
+            _store.MarkOperationAsEnded(test);
+            _store.StartOrContinue(test).Value.Should().Be(0);
         }
 
         [Fact]
@@ -276,6 +278,11 @@ namespace Tests
             third.Version.Should().Be(1);
 
             rez.GetNext().IsEmpty.Should().BeTrue();
+        }
+
+        public void Dispose()
+        {
+            _store.ResetStorage();
         }
     }
 }
