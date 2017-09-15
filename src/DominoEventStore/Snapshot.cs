@@ -4,6 +4,7 @@ namespace DominoEventStore
 {
     public class Snapshot
     {
+        protected Snapshot() { }
         public Snapshot(int version, Guid entityId, string tenantId, string serializedData, DateTimeOffset snapshotDate)
         {
             Version = version;

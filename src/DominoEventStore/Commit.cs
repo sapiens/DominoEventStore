@@ -4,7 +4,7 @@ namespace DominoEventStore
 {
     public class Commit:UnversionedCommit
     {
-        public Commit()
+        protected Commit()
         {
             
         }

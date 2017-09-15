@@ -187,7 +187,7 @@ namespace Tests
             await _store.DeleteSnapshot(snap.EntityId, snap.TenantId,snap.Version);
             var get = await _store.GetData(Config(c => c.OfEntity(snap.EntityId).IncludeSnapshots(true)),
                 CancellationToken.None);
-            get.Value.LatestSnapshot.Value.ShouldBeEquivalentTo(snap1);
+            get.Value.LatestSnapshot.Value.ShouldBeEquivalentTo(snap1,c=>c.Excluding(d=>d.SnapshotDate));
 
             await _store.DeleteSnapshot(snap.EntityId, snap.TenantId, snap1.Version);
             get = await _store.GetData(Config(c => c.OfEntity(snap.EntityId).IncludeSnapshots(true)),
