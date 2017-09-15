@@ -1,6 +1,6 @@
 version: 1.0.{build}
 
-skip_non_tags: true
+skip_non_tags: false
 
 image: Previous Visual Studio 2017
 
