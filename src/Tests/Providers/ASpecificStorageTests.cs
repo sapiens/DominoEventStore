@@ -21,6 +21,12 @@ namespace Tests
             _store = store;
             store.InitStorage();
         }
+
+        protected virtual void DisposeOther()
+        {
+            
+        }
+
         [Fact]
         public async Task append_then_get_events_no_snapshot()
         {
@@ -283,6 +289,7 @@ namespace Tests
         public void Dispose()
         {
             _store.ResetStorage();
+            DisposeOther();
         }
     }
 }

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Data.SqlClient;
 using System.Data.SQLite;
+using System.Diagnostics;
 using System.Linq;
+using CavemanTools.Logging;
 using DominoEventStore;
 using DominoEventStore.Providers;
 using Ploeh.AutoFixture;
@@ -38,6 +40,7 @@ namespace Tests
                     ,new SqliteProvider(SqlFuManager.Config.CreateFactory<IEventStoreSqlFactory>(new SqlFu.Providers.Sqlite.SqliteProvider(SQLiteFactory.Instance.CreateConnection),SqliteTests.ConnectionString ))
                 }
             };
+            LogManager.OutputTo(s=>Trace.WriteLine(s));
             SqlFuManager.UseLogManager();
             var option = provs[typeof(T)];
             //option.Schema = "guest";

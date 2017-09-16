@@ -11,7 +11,7 @@ namespace DominoEventStore.Providers
 
             return $@"
 
-CREATE TABLE if not exists `{schema}`.`{CommitsTable}`(
+CREATE TABLE if not exists `{CommitsTable}`(
 `Id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT
 , `TenantId` TEXT NOT NULL
 , `EntityId` TEXT NOT NULL
@@ -20,15 +20,15 @@ CREATE TABLE if not exists `{schema}`.`{CommitsTable}`(
 , `Timestamp` TEXT NOT NULL
 , `Version` INTEGER NOT NULL 
                );
-CREATE INDEX `IX_Commits_Cid` ON `{schema}`.`{CommitsTable}` (`CommitId` ASC);
-CREATE INDEX `IX_Commits_Ver` ON `{schema}`.`{CommitsTable}` (`EntityId` ,`Version` );
+CREATE INDEX if not exists `IX_Commits_Cid` ON `{CommitsTable}` (`CommitId` ASC);
+CREATE INDEX if not exists `IX_Commits_Ver` ON `{CommitsTable}` (`EntityId` ,`Version` );
 
-CREATE TABLE if not exists `{schema}`.`{SnapshotsTable}` 
+CREATE TABLE if not exists `{SnapshotsTable}` 
 ( 
 `Id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, `TenantId` TEXT NOT NULL, `EntityId` TEXT NOT NULL, `Version` INTEGER NOT NULL, `SerializedData` TEXT NOT NULL, `SnapshotDate` TEXT NOT NULL 
 );
-CREATE INDEX `IX_SNapshots_Ver` ON `{schema}`.`{SnapshotsTable}` (`EntityId` ,`Version` );
-CREATE TABLE if not exists `{schema}`.`{BatchTable}`  ( `Name` TEXT NOT NULL, `Skip` INTEGER NOT NULL );
+CREATE INDEX if not exists `IX_SNapshots_Ver` ON `{SnapshotsTable}` (`EntityId` ,`Version` );
+CREATE TABLE if not exists `{BatchTable}`  ( `Name` TEXT NOT NULL, `Skip` INTEGER NOT NULL );
 "
 ;
         }

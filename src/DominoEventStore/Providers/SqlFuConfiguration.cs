@@ -39,6 +39,14 @@ namespace DominoEventStore.Providers
             _cnx.MustNotBeEmpty("We need a connection string");
             _config = _config ?? SqlFuManager.Config;
             _config.AddProfile<IEventStoreSqlFactory>(_provider,_cnx);
+            _config.Converters.RegisterConverter(o => 
+            (o == null || o == DBNull.Value) ? (int?)null : (int)o);
+            _config.Converters.RegisterConverter(o =>
+            {
+                if (o.GetType() == typeof(long)) return (long) o;
+                if (o.GetType() == typeof(long?)) return (long?) o;
+                throw new InvalidCastException();
+            });
             _config.ConfigureTableForPoco<Commit>(d =>
             {
                 d.Table = new TableName(ASqlDbProvider.CommitsTable, _schema);

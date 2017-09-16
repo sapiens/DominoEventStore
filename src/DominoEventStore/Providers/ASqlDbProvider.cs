@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using SqlFu;
+using SqlFu.Configuration;
 using SqlFu.Providers.SqlServer;
 
 namespace DominoEventStore.Providers
@@ -205,8 +206,10 @@ namespace DominoEventStore.Providers
         {
             using (var db = _db.Create())
             {
-                db.Execute($"truncate table {Schema}.{CommitsTable}");
-                db.Execute($"truncate table {Schema}.{SnapshotsTable}");
+                db.DeleteFrom<Commit>();
+                db.DeleteFrom<Snapshot>();
+                //db.Execute($"truncate table {db.GetTableName<Commit>()}");
+                //db.Execute($"truncate table {db.GetTableName<Snapshot>()}");
             }            
         }
 
