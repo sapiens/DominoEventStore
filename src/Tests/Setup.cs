@@ -43,19 +43,21 @@ namespace Tests
             LogManager.OutputTo(s=>Trace.WriteLine(s));
             SqlFuManager.UseLogManager();
             var option = provs[typeof(T)];
-            //option.Schema = "guest";
-            SqlFuManager.Config.ConfigureTableForPoco<Commit>(d =>
-            {
-                d.Table=new TableName(ASqlDbProvider.CommitsTable,TestSchema);
-                d.IdentityColumn = "Id";
-            });
-            SqlFuManager.Config.ConfigureTableForPoco<Snapshot>(d =>
-            {
-                d.Table=new TableName(ASqlDbProvider.SnapshotsTable,TestSchema);
-                d.IdentityColumn = "Id";
-            });
-            SqlFuManager.Config.ConfigureTableForPoco<BatchProgress>(d =>
-                d.Table = new TableName(ASqlDbProvider.BatchTable, TestSchema));
+            var sc=new SqlFuConfiguration();
+            sc.Configure();
+
+            //SqlFuManager.Config.ConfigureTableForPoco<Commit>(d =>
+            //{
+            //    d.Table=new TableName(ASqlDbProvider.CommitsTable);
+            //    d.IdentityColumn = "Id";
+            //});
+            //SqlFuManager.Config.ConfigureTableForPoco<Snapshot>(d =>
+            //{
+            //    d.Table=new TableName(ASqlDbProvider.SnapshotsTable);
+            //    d.IdentityColumn = "Id";
+            //});
+            //SqlFuManager.Config.ConfigureTableForPoco<BatchProgress>(d =>
+            //    d.Table = new TableName(ASqlDbProvider.BatchTable));
             return option;
         }
 
