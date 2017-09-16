@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Data.SqlClient;
+using System.Data.SQLite;
 using System.Linq;
 using DominoEventStore;
 using DominoEventStore.Providers;
@@ -21,7 +22,7 @@ namespace Tests
             
         };
 
-        public const string TestSchema = "guest";
+        public const string TestSchema = "";
 
        public static ISpecificDbStorage GetDbFactory<T>() 
         {
@@ -30,12 +31,16 @@ namespace Tests
                 {
                     typeof(SqlServerTests)
                     ,new SqlServerProvider(SqlFuManager.Config.CreateFactory<IEventStoreSqlFactory>(
-                        new SqlServer2012Provider(SqlClientFactory.Instance.CreateConnection),SqlServerTests.ConnectionString))
+                        new SqlServer2012Provider(SqlClientFactory.Instance.CreateConnection),SqlServerTests.ConnectionString))                    
+                },
+                {
+                    typeof(SqliteTests)
+                    ,new SqliteProvider(SqlFuManager.Config.CreateFactory<IEventStoreSqlFactory>(new SqlFu.Providers.Sqlite.SqliteProvider(SQLiteFactory.Instance.CreateConnection),SqliteTests.ConnectionString ))
                 }
             };
             SqlFuManager.UseLogManager();
             var option = provs[typeof(T)];
-            option.Schema = "guest";
+            //option.Schema = "guest";
             SqlFuManager.Config.ConfigureTableForPoco<Commit>(d =>
             {
                 d.Table=new TableName(ASqlDbProvider.CommitsTable,TestSchema);

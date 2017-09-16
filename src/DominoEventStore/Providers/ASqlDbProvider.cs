@@ -20,6 +20,7 @@ namespace DominoEventStore.Providers
             switch (providerId)
             {
                 case SqlServer2012Provider.Id: return new SqlServerProvider(SqlFuManager.GetDbFactory<IEventStoreSqlFactory>()){Schema = schema};
+                case SqlFu.Providers.Sqlite.SqliteProvider.Id: return new SqliteProvider(SqlFuManager.GetDbFactory<IEventStoreSqlFactory>()){Schema = schema};
             }
             throw new NotSupportedException();
         }
