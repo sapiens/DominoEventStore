@@ -68,6 +68,17 @@ namespace Tests
 
         }
 
+        [Fact]
+        public async Task regenerate_read_model()
+        {
+            await SetupSrc();
+            var count = 0;
+            _src.Advanced.GenerateReadModel("gen", ev =>
+            {
+                count++;
+            });
+            count.Should().Be(MaxEvents);
+        }
 
         public void Dispose()
         {
