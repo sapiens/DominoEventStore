@@ -3,6 +3,7 @@ using FluentAssertions;
 using Xunit;
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Data.SqlClient;
 using System.Data.SQLite;
 using System.Diagnostics;
@@ -11,13 +12,15 @@ using System.Threading.Tasks;
 using CavemanTools.Logging;
 using DominoEventStore;
 using Ploeh.AutoFixture;
+using SqlFu;
+using SqlFu.Providers.Sqlite;
 
 
 namespace Tests
 {
     public class IntegrationTests:IDisposable
     {
-        private const int MaxEvents = 1;
+        private const int MaxEvents = 30;
         private IStoreEvents _dest;
         private IStoreEvents _src;
         Fixture _fixture=new Fixture();
@@ -48,12 +51,16 @@ namespace Tests
             
         }
 
-        [Fact]
+
+        
+
+      [Fact]
         public async Task migrate_from_sqlite_to_sqlserver()
         {
             await SetupSrc();
-            var i = 0;
-            _src.Advanced.MigrateEventsTo(_dest,"bubu");
+            var i = 10;
+
+            _src.Advanced.MigrateEventsTo(_dest, "bubu");
             var evs = await _dest.GetEvents(_entities[i]);
             evs.Value.Count.Should().Be(1);
             var ev = evs.Value.First() as Event1;

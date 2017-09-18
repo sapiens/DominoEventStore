@@ -57,7 +57,6 @@ namespace DominoEventStore.Providers
 
         public CommittedEvents GetNextBatch(MigrationConfig config, ProcessedCommitsCount count)
         {
-            config.BatchSize = 2;
             using (var db = _db.Create())
             {
                 var all = db.QueryAs(q => q
