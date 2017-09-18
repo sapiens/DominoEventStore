@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Data.Common;
+using DominoEventStore.Providers;
 using SqlFu;
 using SqlFu.Configuration;
 using SqlFu.Providers.SqlServer;
 
-namespace DominoEventStore.Providers
+namespace DominoEventStore
 {
     public static class ProviderExtensions
     {
@@ -15,11 +16,19 @@ namespace DominoEventStore.Providers
             store.WithProvider(provider);
             return store;
         }
+        public static IConfigureEventStore UseSqlite(this IConfigureEventStore store, string cnx, Func<DbConnection> factory)
+        {
+           RegisterSqlFuConfig();
+            var provider=new SqliteProvider(SqlFuManager.Config.CreateFactory<IDbFactory>( new SqlFu.Providers.Sqlite.SqliteProvider(factory),cnx));
+            store.WithProvider(provider);
+            return store;
+        }
 
         static bool _sqlFuDone=false;
        public static void RegisterSqlFuConfig(string schema=null)
         {
             if (_sqlFuDone) return;
+            SqlFuManager.UseLogManager();
             SqlFuManager.Config.RegisterConverter(o =>
             {
                 if (o == null || o == DBNull.Value)

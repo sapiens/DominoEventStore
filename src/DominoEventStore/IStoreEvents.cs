@@ -30,7 +30,7 @@ namespace DominoEventStore
         /// <param name="token"></param>
         /// <param name="includeSnapshots"></param>
         /// <returns></returns>
-        Task<Optional<EntityEvents>> GetEvents(Guid entityId, string tenantId = EventStore.DefaultTenant, CancellationToken? token = null, bool includeSnapshots = true);
+        Task<Optional<EntityEvents>> GetEvents(Guid entityId, string tenantId = EventStore.DefaultTenant, CancellationToken? token = null, bool includeSnapshots = false);
         /// <summary>
         /// Customize your query a bit more, if you need more finesse
         /// </summary>

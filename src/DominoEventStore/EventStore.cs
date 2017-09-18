@@ -1,4 +1,5 @@
 using System;
+using CavemanTools.Logging;
 
 namespace DominoEventStore
 {
@@ -8,7 +9,7 @@ namespace DominoEventStore
 
         public static IStoreEvents Build(Action<IConfigureEventStore> cfg)
         {
-            cfg.MustNotBeDefault();
+            cfg.MustNotBeDefault();            
             var settings=new EventStoreSettings();
             cfg(settings);
             settings.EnsureIsValid(); 
