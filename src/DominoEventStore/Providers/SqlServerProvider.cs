@@ -1,10 +1,11 @@
 ﻿using System;
+using SqlFu;
 
 namespace DominoEventStore.Providers
 {
     public class SqlServerProvider : ASqlDbProvider
     {
-        public SqlServerProvider(IEventStoreSqlFactory db) : base(db)
+        public SqlServerProvider(IDbFactory db) : base(db)
         {
         }
 

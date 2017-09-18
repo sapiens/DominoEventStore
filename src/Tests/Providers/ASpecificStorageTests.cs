@@ -61,7 +61,7 @@ namespace Tests
             var data = await _store.GetData(Config(c => c.OfEntity(commit1.EntityId).IncludeSnapshots(true)), CancellationToken.None);
             var commits = data.Value.Commits.ToArray();
             data.Value.LatestSnapshot.HasValue.Should().BeTrue();
-            data.Value.LatestSnapshot.Value.ShouldBeEquivalentTo(snapshot);
+            data.Value.LatestSnapshot.Value.ShouldBeEquivalentTo(snapshot,i=>i.Excluding(d=>d.SnapshotDate));
             commits.Length.Should().Be(1);
             commits[0].Version.Should().Be(3);
         }
@@ -82,7 +82,7 @@ namespace Tests
             var data = await _store.GetData(Config(c => c.OfEntity(commit1.EntityId).IncludeSnapshots(true)), CancellationToken.None);
             var commits = data.Value.Commits.ToArray();
             data.Value.LatestSnapshot.HasValue.Should().BeTrue();
-            data.Value.LatestSnapshot.Value.ShouldBeEquivalentTo(snapshot);
+            data.Value.LatestSnapshot.Value.ShouldBeEquivalentTo(snapshot,i=>i.Excluding(d=>d.SnapshotDate));
             commits.Length.Should().Be(0);            
         }
 
@@ -94,7 +94,7 @@ namespace Tests
 
             var result=await _store.Append(commit1);
             result.WasSuccessful.Should().BeFalse();
-            result.DuplicateCommit.ShouldBeEquivalentTo(new Commit(1,commit1));            
+            result.DuplicateCommit.ShouldBeEquivalentTo(new Commit(1,commit1),c=>c.Excluding(d=>d.Timestamp));            
         }
 
 #if !IN_MEMORY
@@ -174,7 +174,7 @@ namespace Tests
             await _store.Store(snap);
             var get = await _store.GetData(Config(c => c.OfEntity(snap.EntityId).IncludeSnapshots(true)),
                 CancellationToken.None);
-            get.Value.LatestSnapshot.Value.ShouldBeEquivalentTo(snap);
+            get.Value.LatestSnapshot.Value.ShouldBeEquivalentTo(snap,i=>i.Excluding(d=>d.SnapshotDate));
             await _store.DeleteSnapshot(snap.EntityId, snap.TenantId);
             get = await _store.GetData(Config(c => c.OfEntity(snap.EntityId).IncludeSnapshots(true)),
                 CancellationToken.None);

@@ -47,7 +47,7 @@ namespace Tests
         }
 
 
-        public void CreateEvents()
+        private void CreateEvents()
         {
             _events = Setup.Events();
         }

@@ -11,22 +11,13 @@ namespace DominoEventStore.Providers
 {
     public abstract class ASqlDbProvider:ISpecificDbStorage
     {
-        private readonly IEventStoreSqlFactory _db;
+        private readonly IDbFactory _db;
 
         public const string CommitsTable = "ES_Commits";
         public const string SnapshotsTable = "ES_Snapshots";
         public const string BatchTable = "ES_Batch";
-        public static ASqlDbProvider CreateFor(string providerId,string schema)
-        {
-            switch (providerId)
-            {
-                case SqlServer2012Provider.Id: return new SqlServerProvider(SqlFuManager.GetDbFactory<IEventStoreSqlFactory>()){Schema = schema};
-                case SqlFu.Providers.Sqlite.SqliteProvider.Id: return new SqliteProvider(SqlFuManager.GetDbFactory<IEventStoreSqlFactory>()){Schema = schema};
-            }
-            throw new NotSupportedException();
-        }
-
-        protected ASqlDbProvider(IEventStoreSqlFactory db)
+      
+        protected ASqlDbProvider(IDbFactory db)
         {
             _db = db;
            
@@ -115,9 +106,9 @@ namespace DominoEventStore.Providers
                         t.Commit();
                         return AppendResult.Ok;
                     }
-                    catch (DbException ex) when(_db.Provider.IsUniqueViolation(ex))
+                    catch (DbException ex) 
                     {
-                        if (ex.Message.Contains("Cid"))
+                        if (ex.Message.Contains(DuplicateCommmitMessage))
                         {
                             var existing = await db
                                 .QueryRowAsync<Commit>(
@@ -127,7 +118,7 @@ namespace DominoEventStore.Providers
                             return new AppendResult(existing);
                         }
 
-                        if (ex.Message.Contains("Ver"))
+                        if (ex.Message.Contains(DuplicateVersion))
                         {
                             throw new ConcurrencyException();
                         }
@@ -137,6 +128,9 @@ namespace DominoEventStore.Providers
             }
         }
 
+        protected virtual string DuplicateVersion => "Ver";
+
+        protected virtual string DuplicateCommmitMessage { get; } = "Cid";
         public void Import(Commit commit)
         {
             using (var db = _db.Create())
@@ -207,9 +201,7 @@ namespace DominoEventStore.Providers
             using (var db = _db.Create())
             {
                 db.DeleteFrom<Commit>();
-                db.DeleteFrom<Snapshot>();
-                //db.Execute($"truncate table {db.GetTableName<Commit>()}");
-                //db.Execute($"truncate table {db.GetTableName<Snapshot>()}");
+                db.DeleteFrom<Snapshot>();                
             }            
         }
 

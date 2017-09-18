@@ -1,14 +1,17 @@
 ﻿using System;
+using SqlFu;
 
 namespace DominoEventStore.Providers
 {
     public class SqliteProvider : ASqlDbProvider
     {
+        protected override string DuplicateCommmitMessage { get; } = "CommitId";
+
+        protected override string DuplicateVersion { get; } = "Version";
+
         protected override string GetInitStorageSql(string schema)
         {
-          //  schema = schema.IsNullOrEmpty()? "main":schema;
-
-
+        
             return $@"
 
 CREATE TABLE if not exists `{CommitsTable}`(
@@ -33,7 +36,7 @@ CREATE TABLE if not exists `{BatchTable}`  ( `Name` TEXT NOT NULL, `Skip` INTEGE
 ;
         }
 
-        public SqliteProvider(IEventStoreSqlFactory db) : base(db)
+        public SqliteProvider(IDbFactory db) : base(db)
         {
         }
     }

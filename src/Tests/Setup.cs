@@ -32,32 +32,18 @@ namespace Tests
             {
                 {
                     typeof(SqlServerTests)
-                    ,new SqlServerProvider(SqlFuManager.Config.CreateFactory<IEventStoreSqlFactory>(
+                    ,new SqlServerProvider(SqlFuManager.Config.CreateFactory<IDbFactory>(
                         new SqlServer2012Provider(SqlClientFactory.Instance.CreateConnection),SqlServerTests.ConnectionString))                    
                 },
                 {
                     typeof(SqliteTests)
-                    ,new SqliteProvider(SqlFuManager.Config.CreateFactory<IEventStoreSqlFactory>(new SqlFu.Providers.Sqlite.SqliteProvider(SQLiteFactory.Instance.CreateConnection),SqliteTests.ConnectionString ))
+                    ,new SqliteProvider(SqlFuManager.Config.CreateFactory<IDbFactory>(new SqlFu.Providers.Sqlite.SqliteProvider(SQLiteFactory.Instance.CreateConnection),SqliteTests.ConnectionString ))
                 }
             };
+            ProviderExtensions.RegisterSqlFuConfig();
             LogManager.OutputTo(s=>Trace.WriteLine(s));
             SqlFuManager.UseLogManager();
             var option = provs[typeof(T)];
-            var sc=new SqlFuConfiguration();
-            sc.Configure();
-
-            //SqlFuManager.Config.ConfigureTableForPoco<Commit>(d =>
-            //{
-            //    d.Table=new TableName(ASqlDbProvider.CommitsTable);
-            //    d.IdentityColumn = "Id";
-            //});
-            //SqlFuManager.Config.ConfigureTableForPoco<Snapshot>(d =>
-            //{
-            //    d.Table=new TableName(ASqlDbProvider.SnapshotsTable);
-            //    d.IdentityColumn = "Id";
-            //});
-            //SqlFuManager.Config.ConfigureTableForPoco<BatchProgress>(d =>
-            //    d.Table = new TableName(ASqlDbProvider.BatchTable));
             return option;
         }
 
