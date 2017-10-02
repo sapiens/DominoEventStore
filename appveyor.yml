@@ -1,8 +1,20 @@
-version: 1.0.{build}
+version: 1.0.0-beta-{build}
 
 image: Visual Studio 2017
 
 configuration: Release
+
+assembly_info:
+
+  patch: true
+
+  file: '**\AssemblyInfo.*'
+
+  assembly_version: '{version}'
+
+  assembly_file_version: '{version}'
+
+  assembly_informational_version: '{version}'
 
 dotnet_csproj:
 
@@ -18,11 +30,13 @@ services: mssql2016
 
 before_build:
 
-- cmd: dotnet restore src
+- cmd: dotnet restore src\
 
 build:
 
-  verbosity: minimal
+  project: src\SqlFu\SqlFu.csproj
+
+  verbosity: quiet
 
 test_script:
 
@@ -31,3 +45,17 @@ test_script:
     cd src/tests
 
     dotnet xunit
+
+artifacts:
+
+- path: '**\*.nupkg'
+
+  name: nuget
+
+deploy:
+
+- provider: NuGet
+
+  api_key:
+
+    secure: zSSdZy/TonHwA3Ltpb2LbBy5zD8+YfYFBayFHPSlkUwR2bj5L9/1MSpMVCqPCCwj
