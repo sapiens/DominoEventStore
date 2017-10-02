@@ -1,7 +1,8 @@
-using System.IO;
-using DominoEventStore.Providers;
+using System.Data.SQLite;
+using SqlFu;
 using Xunit;
-[assembly: CollectionBehavior(DisableTestParallelization = true, MaxParallelThreads = 1)]
+using Xunit.Abstractions;
+
 namespace Tests
 {
     [Collection("sqlite")]
@@ -11,10 +12,13 @@ namespace Tests
         public static string ConnectionString { get; } = "Data Source=test.db;Version=3;New=True;BinaryGUID=False";
 
 
-        public SqliteTests() : base(Setup.GetDbFactory<SqliteTests>())
+        public SqliteTests(ITestOutputHelper t) : base(t)
         {
             
         }
+
+        protected override IDbFactory GetFactory()
+        => new SqlFuConfig().CreateFactoryForTesting(new SqlFu.Providers.Sqlite.SqliteProvider(SQLiteFactory.Instance.CreateConnection), ConnectionString);
 
         protected override void DisposeOther()
         {

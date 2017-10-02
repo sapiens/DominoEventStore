@@ -1,20 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Data.SqlClient;
-using System.Data.SQLite;
-using System.Diagnostics;
-using System.Linq;
-using CavemanTools.Logging;
-using DominoEventStore;
+﻿using DominoEventStore;
 using DominoEventStore.Providers;
 using Ploeh.AutoFixture;
 using SqlFu;
-using SqlFu.Configuration;
-using SqlFu.Providers;
 using SqlFu.Providers.SqlServer;
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Diagnostics;
+using System.Linq;
+using CavemanTools.Logging;
+using Xunit;
+using Xunit.Abstractions;
 using Utils = DominoEventStore.Utils;
-
+[assembly: CollectionBehavior(DisableTestParallelization = true, MaxParallelThreads = 1)]
 namespace Tests
 {
     public static class Setup
@@ -26,26 +24,26 @@ namespace Tests
 
         public const string TestSchema = "";
 
-       public static ISpecificDbStorage GetDbFactory<T>() 
-        {
-            var provs=new Dictionary<Type,ISpecificDbStorage>()
+       public static ISpecificDbStorage GetDbStorage(IDbFactory f,ITestOutputHelper t)
+       {
+           if (f==null) return new InMemory();
+            var provs=new Dictionary<string,ISpecificDbStorage>()
             {
                 {
-                    typeof(SqlServerTests)
-                    ,new SqlServerProvider(SqlFuManager.Config.CreateFactory<IDbFactory>(
-                        new SqlServer2012Provider(SqlClientFactory.Instance.CreateConnection),SqlServerTests.ConnectionString))                    
+                    SqlServer2012Provider.Id
+                    ,new SqlServerProvider(f)                    
                 },
                 {
-                    typeof(SqliteTests)
-                    ,new SqliteProvider(SqlFuManager.Config.CreateFactory<IDbFactory>(new SqlFu.Providers.Sqlite.SqliteProvider(SQLiteFactory.Instance.CreateConnection),SqliteTests.ConnectionString ))
+                    SqlFu.Providers.Sqlite.SqliteProvider.Id
+                    ,new SqliteProvider(f)
                 }
             };
-            ProviderExtensions.RegisterSqlFuConfig();
-            LogManager.OutputTo(s=>Trace.WriteLine(s));
-            SqlFuManager.UseLogManager();
-            var option = provs[typeof(T)];
-            return option;
-        }
+            ProviderExtensions.RegisterSqlFuConfig(f.Configuration);
+            
+            f.Configuration.UseLogManager();
+           LogManager.OutputTo(t.WriteLine);
+           return provs[f.Provider.ProviderId];
+       }
 
         public static readonly bool IsAppVeyor = Environment.GetEnvironmentVariable("Appveyor")?.ToUpperInvariant() == "TRUE";
 

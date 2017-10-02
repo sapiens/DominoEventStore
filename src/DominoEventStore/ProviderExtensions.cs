@@ -1,69 +1,40 @@
-﻿using System;
-using System.Data.Common;
+﻿using CavemanTools.Logging;
 using DominoEventStore.Providers;
 using SqlFu;
 using SqlFu.Configuration;
-using SqlFu.Providers.SqlServer;
 
 namespace DominoEventStore
 {
     public static class ProviderExtensions
     {
-        public static IConfigureEventStore UseMSSql(this IConfigureEventStore store, string cnx, Func<DbConnection> factory, string schema = null)
+        public static IConfigureEventStore UseMSSql(this IConfigureEventStore store, IDbFactory factory, string schema = null)
         {
-           RegisterSqlFuConfig(schema);
-            var provider=new SqlServerProvider(SqlFuManager.Config.CreateFactory<IDbFactory>(new SqlServer2012Provider(factory),cnx));
+           RegisterSqlFuConfig(factory.Configuration, schema);
+            var provider=new SqlServerProvider(factory);
             store.WithProvider(provider);
             return store;
         }
-        public static IConfigureEventStore UseSqlite(this IConfigureEventStore store, string cnx, Func<DbConnection> factory)
+        public static IConfigureEventStore UseSqlite(this IConfigureEventStore store, IDbFactory factory)
         {
-           RegisterSqlFuConfig();
-            var provider=new SqliteProvider(SqlFuManager.Config.CreateFactory<IDbFactory>( new SqlFu.Providers.Sqlite.SqliteProvider(factory),cnx));
+           RegisterSqlFuConfig(factory.Configuration);
+            var provider=new SqliteProvider(factory);
             store.WithProvider(provider);
             return store;
         }
 
-        static bool _sqlFuDone=false;
-       public static void RegisterSqlFuConfig(string schema=null)
+ 
+       public static void RegisterSqlFuConfig(SqlFuConfig config,string schema=null)
         {
-            if (_sqlFuDone) return;
-            SqlFuManager.UseLogManager();
-            SqlFuManager.Config.RegisterConverter(o =>
+            config.ConfigureTableForPoco<Commit>(d =>
             {
-                if (o == null || o == DBNull.Value)
-                {
-                    return (int?) null;
-                }
-                else
-                {
-                   
-                    if (o.GetType()==typeof(Int64)) return (int)(long) o;
-                    if (o.GetType()==typeof(Int32)) return (int)o;
-                    //return (int)o;
-                }
-                throw new InvalidCastException();
+                d.TableName = new TableName(ASqlDbProvider.CommitsTable, schema);                    
             });
-            SqlFuManager.Config.RegisterConverter(o =>
+            config.ConfigureTableForPoco<Snapshot>(d =>
             {
-                if (o == null) return null;
-                if (o.GetType() == typeof(long)) return (long)o;
-                if (o.GetType() == typeof(long?)) return (long?)o;
-                throw new InvalidCastException();
+                d.TableName = new TableName(ASqlDbProvider.SnapshotsTable, schema);                    
             });
-            SqlFuManager.Config.ConfigureTableForPoco<Commit>(d =>
-            {
-                d.Table = new TableName(ASqlDbProvider.CommitsTable, schema);
-                d.IdentityColumn = "Id";
-            });
-            SqlFuManager.Config.ConfigureTableForPoco<Snapshot>(d =>
-            {
-                d.Table = new TableName(ASqlDbProvider.SnapshotsTable, schema);
-                d.IdentityColumn = "Id";
-            });
-            SqlFuManager.Config.ConfigureTableForPoco<BatchProgress>(d =>
-                d.Table = new TableName(ASqlDbProvider.BatchTable, schema));
-            _sqlFuDone = true;
+            config.ConfigureTableForPoco<BatchProgress>(d =>d.TableName = new TableName(ASqlDbProvider.BatchTable, schema));   
+                    
         }
     }
 }

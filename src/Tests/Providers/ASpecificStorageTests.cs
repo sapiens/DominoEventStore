@@ -1,27 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Dynamic;
+﻿using DominoEventStore;
+using FluentAssertions;
+using SqlFu;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using DominoEventStore;
-using FluentAssertions;
 using Xunit;
+using Xunit.Abstractions;
+using Utils = DominoEventStore.Utils;
 
 namespace Tests
 {
     public abstract class ASpecificStorageTests:IDisposable
     {
         private readonly ISpecificDbStorage _store;
-        
+        private CancellationToken _cancellationToken;
+        private CancellationTokenSource _src;
 
-        protected ASpecificStorageTests(ISpecificDbStorage store)
+
+        protected ASpecificStorageTests(ITestOutputHelper t)
         {
-            _store = store;
-            store.InitStorage();
+            _store = Setup.GetDbStorage(GetFactory(),t);
+            _src=new CancellationTokenSource();
+            _cancellationToken = _src.Token;
+            _store.InitStorage();
         }
 
+        protected abstract IDbFactory GetFactory();
         protected virtual void DisposeOther()
         {
             
@@ -36,7 +41,7 @@ namespace Tests
             await _store.Append(commit1);
             await _store.Append(commit2);
             await _store.Append(commit3);
-            var data = await _store.GetData(Config(c=>c.OfEntity(commit1.EntityId)), CancellationToken.None);
+            var data = await _store.GetData(Config(c=>c.OfEntity(commit1.EntityId)), _cancellationToken);
             var commits = data.Value.Commits.ToArray();
             commits.Length.Should().Be(2);
             commits[0].Version.Should().Be(1);
@@ -58,7 +63,7 @@ namespace Tests
             await _store.Store(snapshot);
             await _store.Append(commit3);
 
-            var data = await _store.GetData(Config(c => c.OfEntity(commit1.EntityId).IncludeSnapshots(true)), CancellationToken.None);
+            var data = await _store.GetData(Config(c => c.OfEntity(commit1.EntityId).IncludeSnapshots(true)), _cancellationToken);
             var commits = data.Value.Commits.ToArray();
             data.Value.LatestSnapshot.HasValue.Should().BeTrue();
             data.Value.LatestSnapshot.Value.ShouldBeEquivalentTo(snapshot,i=>i.Excluding(d=>d.SnapshotDate));
@@ -79,7 +84,7 @@ namespace Tests
             await _store.Store(snapshot);
             
 
-            var data = await _store.GetData(Config(c => c.OfEntity(commit1.EntityId).IncludeSnapshots(true)), CancellationToken.None);
+            var data = await _store.GetData(Config(c => c.OfEntity(commit1.EntityId).IncludeSnapshots(true)), _cancellationToken);
             var commits = data.Value.Commits.ToArray();
             data.Value.LatestSnapshot.HasValue.Should().BeTrue();
             data.Value.LatestSnapshot.Value.ShouldBeEquivalentTo(snapshot,i=>i.Excluding(d=>d.SnapshotDate));
@@ -140,7 +145,7 @@ namespace Tests
             await _store.Store(snap1);
 
             var get = await _store.GetData(Config(c => c.OfEntity(snap.EntityId).IncludeSnapshots(true)),
-                CancellationToken.None);
+                _cancellationToken);
             var mem2 = Utils.UnpackSnapshot(get.Value.LatestSnapshot.Value.SerializedData) as SomeMemento;
             var mem1 = Utils.UnpackSnapshot(snap1.SerializedData) as SomeMemento;
             mem2.Name.Should().Be(mem1.Name);
@@ -159,7 +164,7 @@ namespace Tests
             await _store.Store(snap1);
 
             var get = await _store.GetData(Config(c => c.OfEntity(snap.EntityId).IncludeSnapshots(true)),
-                CancellationToken.None);
+                _cancellationToken);
             var mem2 = Utils.UnpackSnapshot(get.Value.LatestSnapshot.Value.SerializedData) as SomeMemento;
             var mem1 = Utils.UnpackSnapshot(snap1.SerializedData) as SomeMemento;
             mem2.Name.Should().Be(mem1.Name);
@@ -173,11 +178,11 @@ namespace Tests
             await _store.Append(Setup.UnversionedCommit(snap.TenantId, snap.EntityId));
             await _store.Store(snap);
             var get = await _store.GetData(Config(c => c.OfEntity(snap.EntityId).IncludeSnapshots(true)),
-                CancellationToken.None);
+                _cancellationToken);
             get.Value.LatestSnapshot.Value.ShouldBeEquivalentTo(snap,i=>i.Excluding(d=>d.SnapshotDate));
             await _store.DeleteSnapshot(snap.EntityId, snap.TenantId);
             get = await _store.GetData(Config(c => c.OfEntity(snap.EntityId).IncludeSnapshots(true)),
-                CancellationToken.None);
+                _cancellationToken);
             get.Value.LatestSnapshot.IsEmpty.Should().BeTrue();
         }
 
@@ -192,12 +197,12 @@ namespace Tests
             
             await _store.DeleteSnapshot(snap.EntityId, snap.TenantId,snap.Version);
             var get = await _store.GetData(Config(c => c.OfEntity(snap.EntityId).IncludeSnapshots(true)),
-                CancellationToken.None);
+                _cancellationToken);
             get.Value.LatestSnapshot.Value.ShouldBeEquivalentTo(snap1,c=>c.Excluding(d=>d.SnapshotDate));
 
             await _store.DeleteSnapshot(snap.EntityId, snap.TenantId, snap1.Version);
             get = await _store.GetData(Config(c => c.OfEntity(snap.EntityId).IncludeSnapshots(true)),
-                CancellationToken.None);
+                _cancellationToken);
             get.Value.LatestSnapshot.IsEmpty.Should().BeTrue();
         }
 
@@ -288,6 +293,7 @@ namespace Tests
 
         public void Dispose()
         {
+            _src.Cancel(true);
             _store.ResetStorage();
             DisposeOther();
         }

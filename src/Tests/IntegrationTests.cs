@@ -14,6 +14,7 @@ using DominoEventStore;
 using Ploeh.AutoFixture;
 using SqlFu;
 using SqlFu.Providers.Sqlite;
+using SqlFu.Providers.SqlServer;
 
 
 namespace Tests
@@ -31,10 +32,13 @@ namespace Tests
         public IntegrationTests()
         {
             LogManager.OutputTo(s=>Trace.WriteLine(s));
+            var conf=new SqlFuConfig();
             _dest = EventStore.Build(c =>
-                c.UseMSSql(SqlServerTests.ConnectionString, SqlClientFactory.Instance.CreateConnection));
+            c.UseMSSql(conf.CreateFactoryForTesting(new SqlServer2012Provider(SqlClientFactory.Instance.CreateConnection),SqlServerTests.ConnectionString)));
+
+
             _src = EventStore.Build(c =>
-                c.UseSqlite(SqliteTests.ConnectionString, SQLiteFactory.Instance.CreateConnection));
+                c.UseSqlite(conf.CreateFactoryForTesting(new SqlFu.Providers.Sqlite.SqliteProvider(SQLiteFactory.Instance.CreateConnection), SqliteTests.ConnectionString)));
         }
 
         async Task SetupSrc()

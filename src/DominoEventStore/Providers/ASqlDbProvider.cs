@@ -3,6 +3,7 @@ using System.Data.Common;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CavemanTools.Logging;
 using SqlFu;
 using SqlFu.Configuration;
 using SqlFu.Providers.SqlServer;
@@ -44,7 +45,7 @@ namespace DominoEventStore.Providers
             {
                 var all = db.QueryAs(q => q
                     .FromAnonymous(new {Id = 1, TenantId = "", EntityId = Guid.Empty},
-                        o => o.SetTableName(CommitsTable, Schema)).Where(d => true)
+                       new TableName(CommitsTable, Schema)).Where(d => true)
                     .AndIf(() => config.EntityId.HasValue, d => d.EntityId == config.EntityId.Value)
                     .AndIf(() => !config.TenantId.IsNullOrEmpty(), d => d.TenantId == config.TenantId)
                     .OrderBy(d => d.Id)
@@ -61,7 +62,7 @@ namespace DominoEventStore.Providers
             {
                 var all = db.QueryAs(q => q
                     .FromAnonymous(new { Id = 1, TenantId = "", EntityId = Guid.Empty },
-                        o => o.SetTableName(CommitsTable, Schema)).Where(d => true)
+                       new TableName(CommitsTable, Schema)).Where(d => true)
                     
                     .AndIf(() => !config.TenantId.IsNullOrEmpty(), d => d.TenantId == config.TenantId)
                     .OrderBy(d => d.Id)

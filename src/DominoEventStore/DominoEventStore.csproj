@@ -4,9 +4,9 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="CavemanTools" Version="4.10.1.23" />
+    <PackageReference Include="CavemanTools" Version="4.11.0.24" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="SqlFu" Version="3.4.1.11" />
+    <PackageReference Include="SqlFu" Version="4.0.0-alpha-34" />
     <PackageReference Include="System.Data.SqlClient" Version="4.4.0" />
   </ItemGroup>
 </Project>
