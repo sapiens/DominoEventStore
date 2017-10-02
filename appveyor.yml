@@ -34,7 +34,7 @@ before_build:
 
 build:
 
-  project: src\SqlFu\SqlFu.csproj
+  project: src\DominoEventStore\DominoEventStore.csproj
 
   verbosity: quiet
 
