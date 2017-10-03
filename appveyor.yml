@@ -48,7 +48,7 @@ test_script:
 
 artifacts:
 
-- path: '**\*.nupkg'
+- path: '**\Release\**\*.nupkg'
 
   name: nuget
 
