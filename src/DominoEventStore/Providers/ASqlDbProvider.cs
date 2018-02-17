@@ -114,7 +114,8 @@ namespace DominoEventStore.Providers
                             var existing = await db
                                 .QueryRowAsync<Commit>(
                                     q => q.From<Commit>()
-                                        .Where(d => d.EntityId == commit.EntityId && d.TenantId == commit.TenantId)
+                                        .Where(d =>d.CommitId==commit.CommitId && d.EntityId == commit.EntityId && d.TenantId == commit.TenantId)
+                                        .Limit(1)
                                         .SelectAll(useAsterisk: true), CancellationToken.None).ConfigureFalse();
                             return new AppendResult(existing);
                         }
