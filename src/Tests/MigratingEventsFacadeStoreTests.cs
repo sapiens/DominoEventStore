@@ -7,7 +7,6 @@ using System.Collections.Immutable;
 using System.Linq;
 using DominoEventStore;
 using NSubstitute;
-using Ploeh.AutoFixture;
 
 
 namespace Tests
@@ -65,9 +64,9 @@ namespace Tests
             SetupStore();
             _sut.Advanced.MigrateEventsTo(_dest,"m");
            _importer.Commits.Count.Should().Be(3);
-           _importer.Commits[0].ShouldBeEquivalentTo(_commits[0]);
-           _importer.Commits[1].ShouldBeEquivalentTo(_commits[1]);
-           _importer.Commits[2].ShouldBeEquivalentTo(_commits[2]);
+           _importer.Commits[0].Should().BeEquivalentTo(_commits[0]);
+           _importer.Commits[1].Should().BeEquivalentTo(_commits[1]);
+           _importer.Commits[2].Should().BeEquivalentTo(_commits[2]);
 
         }
 

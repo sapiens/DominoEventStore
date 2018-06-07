@@ -57,7 +57,7 @@ namespace Tests
             var data = Utils.PackSnapshot(memento);
             var unpackSnapshot = Utils.UnpackSnapshot(data);
             var des = unpackSnapshot as MyMemento;
-            des.ShouldBeEquivalentTo(memento);            
+            des.Should().BeEquivalentTo(memento);            
         }
 
         public class MyMemento

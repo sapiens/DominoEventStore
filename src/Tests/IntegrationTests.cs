@@ -1,19 +1,17 @@
-﻿ 
+﻿
 using FluentAssertions;
 using Xunit;
 using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Data.SqlClient;
 using System.Data.SQLite;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoFixture;
 using CavemanTools.Logging;
 using DominoEventStore;
-using Ploeh.AutoFixture;
 using SqlFu;
-using SqlFu.Providers.Sqlite;
 using SqlFu.Providers.SqlServer;
 
 
@@ -68,7 +66,7 @@ namespace Tests
             var evs = await _dest.GetEvents(_entities[i]);
             evs.Value.Count.Should().Be(1);
             var ev = evs.Value.First() as Event1;
-            _events[i].CastAs<Event1>().ShouldBeEquivalentTo(ev);
+            _events[i].CastAs<Event1>().Should().BeEquivalentTo(ev);
 
         }
 

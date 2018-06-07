@@ -1,13 +1,12 @@
 ﻿using DominoEventStore;
 using DominoEventStore.Providers;
-using Ploeh.AutoFixture;
 using SqlFu;
 using SqlFu.Providers.SqlServer;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
+using AutoFixture;
 using CavemanTools.Logging;
 using Xunit;
 using Xunit.Abstractions;

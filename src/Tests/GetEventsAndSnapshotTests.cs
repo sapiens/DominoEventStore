@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AutoFixture;
 using DominoEventStore;
 using Xunit;
 using FluentAssertions;
 using NSubstitute;
-using Ploeh.AutoFixture;
 
 namespace Tests
 {

@@ -8,9 +8,9 @@
     <DocumentationFile>bin\Release\netstandard1.6\DominoEventStore.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="CavemanTools" Version="4.11.0.24" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="SqlFu" Version="4.0.0-alpha-34" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.4.0" />
+    <PackageReference Include="CavemanTools" Version="4.12.0.26" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="SqlFu" Version="4.0.0-beta2-35" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.5.0" />
   </ItemGroup>
 </Project>

@@ -53,7 +53,7 @@ namespace DominoEventStore
 
             IReadOnlyCollection<object> GetEvents(IEnumerable<Commit> commits)
                 =>
-                    commits.OrderBy(d => d.Version).SelectMany(d =>
+                    commits.SelectMany(d =>
                         Utils.UnpackEvents(d.Timestamp, d.EventData, _settings.EventMappers)).ToArray();
             return new EntityEvents(GetEvents(raw.Commits),raw.Commits.Max(d=>d.Version),GetSnapshot(raw.LatestSnapshot.ValueOr(null)?.SerializedData));
             
