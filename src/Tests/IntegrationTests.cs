@@ -32,11 +32,11 @@ namespace Tests
             LogManager.OutputTo(s=>Trace.WriteLine(s));
             var conf=new SqlFuConfig();
             _dest = EventStore.Build(c =>
-            c.UseMSSql(conf.CreateFactoryForTesting(new SqlServer2012Provider(SqlClientFactory.Instance.CreateConnection),SqlServerTests.ConnectionString)));
+                     c.UseMSSql(SqlClientFactory.Instance.CreateConnection,SqlServerTests.ConnectionString));
 
 
             _src = EventStore.Build(c =>
-                c.UseSqlite(conf.CreateFactoryForTesting(new SqlFu.Providers.Sqlite.SqliteProvider(SQLiteFactory.Instance.CreateConnection), SqliteTests.ConnectionString)));
+                c.UseSqlite(SQLiteFactory.Instance.CreateConnection, SqliteTests.ConnectionString));
         }
 
         async Task SetupSrc()
