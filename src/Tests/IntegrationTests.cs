@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using AutoFixture;
 using CavemanTools.Logging;
 using DominoEventStore;
+using NSubstitute.Exceptions;
 using SqlFu;
 using SqlFu.Providers.SqlServer;
 
@@ -36,7 +37,7 @@ namespace Tests
                 c.UseMSSql(SqlClientFactory.Instance.CreateConnection, SqlServerTests.ConnectionString);                
             });
 
-            _dest.Advanced.GenerateReadModel("bla");
+            
             _src = EventStore.Build(c =>
                 c.UseSqlite(SQLiteFactory.Instance.CreateConnection, SqliteTests.ConnectionString));
         }
@@ -57,20 +58,30 @@ namespace Tests
         }
 
 
-        
+        public class RewriteEvent : ARewriteEvent<Event1>
+        {
+            public override Event1 Rewrite(dynamic jsonData, Event1 deserializedEvent, DateTimeOffset commitDate)
+            {
+                deserializedEvent.Nr += 60;
+                return deserializedEvent;
+            }
+        }
 
       [Fact]
         public async Task migrate_from_sqlite_to_sqlserver()
         {
             await SetupSrc();
-            var i = 10;
-
-            _src.Advanced.MigrateEventsTo(_dest, "bubu");
+            loop:
+            var i = new Random().Next(0,MaxEvents);
+            
+            _src.Advanced.MigrateEventsTo(_dest, "bubu",c=>c.AddConverters(new RewriteEvent()));
             var evs = await _dest.GetEvents(_entities[i]);
             evs.Value.Count.Should().Be(1);
+            var orig = _events[i].CastAs<Event1>();
+            if (orig==null) goto loop;
+            
             var ev = evs.Value.First() as Event1;
-            _events[i].CastAs<Event1>().Should().BeEquivalentTo(ev);
-
+            ev.Nr.Should().Be(60+orig.Nr);            
         }
 
         [Fact]
