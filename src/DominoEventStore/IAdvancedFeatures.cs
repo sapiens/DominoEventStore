@@ -25,7 +25,7 @@ namespace DominoEventStore
         void DeleteTenant(string tenantId);
 
         /// <summary>
-        /// Regenerates read model using the provided function.
+        /// Regenerates read model using the provided function. 
         /// </summary>
         /// <param name="operationName"></param>
         /// <param name="modelUpdater"></param>

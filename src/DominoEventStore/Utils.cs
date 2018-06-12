@@ -14,12 +14,7 @@ namespace DominoEventStore
             public dynamic Data { get; set; }
         }
 
-        private static readonly JsonSerializerSettings Settings=new JsonSerializerSettings()
-        {
-            DateFormatHandling = DateFormatHandling.IsoDateFormat
-        };
-
-        private static readonly JsonSerializerSettings SnapshotSerializerSettings = new JsonSerializerSettings()
+       private static readonly JsonSerializerSettings SnapshotSerializerSettings = new JsonSerializerSettings()
         {
             Formatting = Formatting.Indented,
             TypeNameHandling = TypeNameHandling.Objects,

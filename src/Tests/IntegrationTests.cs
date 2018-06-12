@@ -30,15 +30,18 @@ namespace Tests
         public IntegrationTests()
         {
             LogManager.OutputTo(s=>Trace.WriteLine(s));
-            var conf=new SqlFuConfig();
+            
             _dest = EventStore.Build(c =>
-                     c.UseMSSql(SqlClientFactory.Instance.CreateConnection,SqlServerTests.ConnectionString));
+            {
+                c.UseMSSql(SqlClientFactory.Instance.CreateConnection, SqlServerTests.ConnectionString);                
+            });
 
-
+            _dest.Advanced.GenerateReadModel("bla");
             _src = EventStore.Build(c =>
                 c.UseSqlite(SQLiteFactory.Instance.CreateConnection, SqliteTests.ConnectionString));
         }
 
+       
         async Task SetupSrc()
         {
             _entities=new List<Guid>();
