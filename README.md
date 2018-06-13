@@ -1,6 +1,6 @@
 # Domino Event Store
 
-[![Appveyor stat](https://ci.appveyor.com/api/projects/status/github/sapiens/dominoeventstore?svg=true)](https://ci.appveyor.com/project/sapiens/dominoeventstore)
+[![Appveyor stat](https://ci.appveyor.com/api/projects/status/github/sapiens/dominoeventstore?svg=true)](https://ci.appveyor.com/project/sapiens/dominoeventstore) [![NuGet](https://img.shields.io/nuget/v/DominoES.svg)](https://www.nuget.org/packages/DominoES)
 
 
 An alternative to the good but somewhat outdated [NEventStore](https://github.com/NEventStore/NEventStore/wiki/Quick-Start), DominoES is inspired by Greg Young's [excellent book](https://leanpub.com/esversioning/read#leanpub-auto-weak-schema) and it's designed to be easy to use, lightweight and versatile.
