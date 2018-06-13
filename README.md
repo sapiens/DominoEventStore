@@ -1,5 +1,8 @@
 # Domino Event Store
 
+[![Appveyor stat](https://ci.appveyor.com/api/projects/status/github/sapiens/dominoeventstore?svg=true)](https://ci.appveyor.com/api/projects/status/github/sapiens/dominoeventstore)
+
+
 An alternative to the good but somewhat outdated [NEventStore](https://github.com/NEventStore/NEventStore/wiki/Quick-Start), DominoES is inspired by Greg Young's [excellent book](https://leanpub.com/esversioning/read#leanpub-auto-weak-schema) and it's designed to be easy to use, lightweight and versatile.
 
 It sits on top of an existing RDBMS (SqlServer, Sqlite), providing an event store for small to medium applications that are using Event Sourcing and don't want to use a separated, dedicated Event Store solution. Great to get you started with ES as it's easy to setup (just Nuget-it) and it takes at most 5 minutes to learn how to use it.
