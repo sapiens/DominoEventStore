@@ -2,7 +2,12 @@
   <PropertyGroup>
     <TargetFramework>netstandard1.6</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.0-beta-1</Version>
+    <Version>1.0.0-beta2-1</Version>
+    <PackageId>DominoES</PackageId>
+    <Authors>Mihai Mogosanu</Authors>
+    <PackageLicenseUrl>https://github.com/sapiens/DominoEventStore/blob/master/LICENSE</PackageLicenseUrl>
+    <RepositoryUrl>https://github.com/sapiens/DominoEventStore</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/sapiens/DominoEventStore</PackageProjectUrl>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>bin\Release\netstandard1.6\DominoEventStore.xml</DocumentationFile>

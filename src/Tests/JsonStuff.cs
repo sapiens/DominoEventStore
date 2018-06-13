@@ -77,9 +77,9 @@ namespace Tests
 
       public class MyEventUpcase : AMapFromEventDataToObject<MyEvent>
         {
-            public override MyEvent Map(dynamic jsonData, MyEvent deserializedEvent, DateTimeOffset commitDate)
+            public override MyEvent Map(dynamic existingData, MyEvent deserializedEvent, DateTimeOffset commitDate)
             {
-                deserializedEvent.Age = jsonData.Age+10;
+                deserializedEvent.Age = existingData.Age+10;
                 return deserializedEvent;
             }
         }

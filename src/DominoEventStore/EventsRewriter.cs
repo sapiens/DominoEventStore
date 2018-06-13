@@ -58,10 +58,10 @@ namespace DominoEventStore
             public bool Handles(Type type)
                 => type == _type;
 
-            public object Map(dynamic jsonData, object deserializedEvent, DateTimeOffset commitDate)
+            public object Map(dynamic existingData, object deserializedEvent, DateTimeOffset commitDate)
             {
-                var rez= _mapr?.Map(jsonData, deserializedEvent, commitDate)??deserializedEvent;
-                return _rew?.Rewrite(jsonData, rez, commitDate) ?? rez;
+                var rez= _mapr?.Map(existingData, deserializedEvent, commitDate)??deserializedEvent;
+                return _rew?.Rewrite(existingData, rez, commitDate) ?? rez;
             }
         }
     }

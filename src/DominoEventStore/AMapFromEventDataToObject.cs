@@ -6,17 +6,17 @@ namespace DominoEventStore
     {
         public bool Handles(Type type)=> typeof(T) == type;
 
-        public object Map(dynamic jsonData, object deserializedEvent, DateTimeOffset commitDate)
-            => Map(jsonData, deserializedEvent as T, commitDate);
+        public object Map(dynamic existingData, object deserializedEvent, DateTimeOffset commitDate)
+            => Map(existingData, deserializedEvent as T, commitDate);
 
         /// <summary>
         /// When the event structure changes, this tells EventStore how to treat the old data.
         /// By default, it's just deserialized to the specified event type, ignoring fields that don't match
         /// </summary>
-        /// <param name="jsonData">Stored event data as expando</param>
-        /// <param name="deserializedEvent">Event with old data automatically deserialized</param>
+        /// <param name="existingData">Stored event data as expando</param>
+        /// <param name="deserializedEvent">Event with values automatically deserialized from the old data</param>
         /// <param name="commitDate"></param>
         /// <returns></returns>
-        public abstract T Map(dynamic jsonData, T deserializedEvent, DateTimeOffset commitDate);
+        public abstract T Map(dynamic existingData, T deserializedEvent, DateTimeOffset commitDate);
     }
 }

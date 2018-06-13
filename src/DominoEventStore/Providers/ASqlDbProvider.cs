@@ -24,6 +24,9 @@ namespace DominoEventStore.Providers
            
             
         }
+
+
+
         public ProcessedCommitsCount StartOrContinue(string name)
         {
             using (var db = _db.Create())

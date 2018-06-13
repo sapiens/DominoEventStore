@@ -15,7 +15,11 @@ namespace DominoEventStore
         /// <param name="tenantId"></param>
         /// <returns></returns>
         IConfigMigration OnlyTenant(string tenantId);
-
+        /// <summary>
+        /// For event rewriting
+        /// </summary>
+        /// <param name="converters"></param>
+        /// <returns></returns>
         IConfigMigration AddConverters(params IRewriteEventData[] converters);
     }
 }

@@ -12,6 +12,8 @@ namespace DominoEventStore
 
         public ISpecificDbStorage Store => _store;
 
+
+
         public IConfigureEventStore AddMapper<T>(AMapFromEventDataToObject<T> mapper) where T : class
         {
             _eventMappers.Add(typeof(T),mapper);

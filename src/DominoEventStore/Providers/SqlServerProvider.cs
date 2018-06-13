@@ -66,7 +66,7 @@ CREATE UNIQUE NONCLUSTERED INDEX [IX_SNapshots_Ver] ON [{schema}].[{SnapshotsTab
 )
 ;
 CREATE TABLE [{schema}].[{BatchTable}](
-	[Name] [varchar](50) NOT NULL,
+	[Name] [varchar](250) NOT NULL,
 	[Skip] [bigint] NOT NULL
 ) ON [PRIMARY]
 end
