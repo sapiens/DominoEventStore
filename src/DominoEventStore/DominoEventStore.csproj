@@ -8,6 +8,9 @@
     <PackageLicenseUrl>https://github.com/sapiens/DominoEventStore/blob/master/LICENSE</PackageLicenseUrl>
     <RepositoryUrl>https://github.com/sapiens/DominoEventStore</RepositoryUrl>
     <PackageProjectUrl>https://github.com/sapiens/DominoEventStore</PackageProjectUrl>
+    <Description>An alternative to the good but somewhat outdated NEventStore, DominoES is designed to be easy to use, lightweight and versatile. 
+Featuring:  .Net Core support,   Multi-tenant support,   Bulk read model generation assistance,    Easy migrations and event data rewriting support (for those special cases) ,    Easy to setup/use,  Great for small to medium non-distributed apps.</Description>
+    <PackageTags>eventsourcing, cqrs, event store</PackageTags>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>bin\Release\netstandard1.6\DominoEventStore.xml</DocumentationFile>
