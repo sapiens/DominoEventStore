@@ -20,7 +20,7 @@ namespace Tests
 {
     public class IntegrationTests:IDisposable
     {
-        private const int MaxEvents = 30;
+        private const int MaxEntities = 500;
         private IStoreEvents _dest;
         private IStoreEvents _src;
         Fixture _fixture=new Fixture();
@@ -46,7 +46,7 @@ namespace Tests
         async Task SetupSrc()
         {
             _entities=new List<Guid>();
-            for (var i = 0; i < MaxEvents;i++)
+            for (var i = 0; i < MaxEntities;i++)
             {
                 var id = Guid.NewGuid();
                 _entities.Add(id);
@@ -72,9 +72,9 @@ namespace Tests
         {
             await SetupSrc();
             loop:
-            var i = new Random().Next(0,MaxEvents);
+            var i = new Random().Next(0,MaxEntities);
             
-            _src.Advanced.MigrateEventsTo(_dest, "bubu",c=>c.AddConverters(new RewriteEvent()));
+            _src.Advanced.MigrateEventsTo(_dest, "bubu",c=>c.BatchSize(50).AddConverters(new RewriteEvent()));
             var evs = await _dest.GetEvents(_entities[i]);
             evs.Value.Count.Should().Be(1);
             var orig = _events[i].CastAs<Event1>();
@@ -93,7 +93,7 @@ namespace Tests
             {
                 count++;
             });
-            count.Should().Be(MaxEvents);
+            count.Should().Be(MaxEntities);
         }
 
         public void Dispose()

@@ -22,7 +22,7 @@ namespace DominoEventStore
         public List<IRewriteEventData> Converters { get; }=new List<IRewriteEventData>();
         IConfigMigration IConfigMigration.BatchSize(int size)
         {
-            size.Must(d=>d>100);
+            //size.Must(d=>d>100);
             BatchSize = size;
             return this;
         }
