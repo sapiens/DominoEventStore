@@ -29,7 +29,7 @@ dotnet_csproj:
 skip_commits:
   files:
     - appveyor*
-    - *gitignore
+    - '*gitignore'
     - '**/*.md'
 
 services: mssql2016
