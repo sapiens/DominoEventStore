@@ -26,6 +26,9 @@ dotnet_csproj:
 
   package_version: '{version}'
 
+skip_commits:
+  message: /README/
+
 services: mssql2016
 
 before_build:
