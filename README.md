@@ -18,7 +18,7 @@ It sits on top of an existing RDBMS (SqlServer, Sqlite), providing an event stor
 
 ## Usage
 
-Everything is done inside the `Build` function. At a minimum you need to specify what db provider to use.
+Configuration is done inside the `Build` function. At a minimum you need to specify what db provider to use.
 
 ```csharp
 //create and configure the event store singleton . Add it as singleton to your favourite DI Container
