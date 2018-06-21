@@ -8,6 +8,7 @@ using DominoEventStore;
 using Xunit;
 using FluentAssertions;
 using NSubstitute;
+using Xunit.Abstractions;
 
 namespace Tests
 {
@@ -17,10 +18,12 @@ namespace Tests
         private ISpecificDbStorage _storage;
         Fixture _fixture=new Fixture();
 
-        public GetEventsAndSnapshotTests()
+        public GetEventsAndSnapshotTests(ITestOutputHelper h)
         {
             _storage = Substitute.For<ISpecificDbStorage>();
-            _sut = new StoreFacade(_storage,Setup.EventStoreSettings);
+            
+            _sut = new StoreFacade(_storage,Setup.EventStoreSettings(h));
+            
         }
 
         [Fact]

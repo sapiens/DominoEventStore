@@ -12,8 +12,10 @@ using AutoFixture;
 using CavemanTools.Logging;
 using DominoEventStore;
 using NSubstitute.Exceptions;
+using Serilog;
 using SqlFu;
 using SqlFu.Providers.SqlServer;
+using Xunit.Abstractions;
 
 
 namespace Tests
@@ -28,18 +30,24 @@ namespace Tests
         private List<Guid> _entities;
 
 
-        public IntegrationTests()
+        public IntegrationTests(ITestOutputHelper h)
         {
-            LogManager.OutputTo(s=>Trace.WriteLine(s));
             
-            _dest = EventStore.Build(c =>
+            
+            _dest = EventStore.WithLogger(d => d.WriteTo.TestOutput(h)).Build(c =>
             {
-                c.UseMSSql(SqlClientFactory.Instance.CreateConnection, SqlServerTests.ConnectionString);                
+            
+                c.UseMSSql(SqlClientFactory.Instance.CreateConnection, SqlServerTests.ConnectionString);
+                
             });
 
             
-            _src = EventStore.Build(c =>
-                c.UseSqlite(SQLiteFactory.Instance.CreateConnection, SqliteTests.ConnectionString));
+            _src = EventStore.WithLogger(d => d.WriteTo.TestOutput(h)).Build(c =>
+            {
+                c.UseSqlite(SQLiteFactory.Instance.CreateConnection, SqliteTests.ConnectionString);
+                
+            });
+
         }
 
        

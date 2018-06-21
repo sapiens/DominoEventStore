@@ -8,6 +8,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using AutoFixture;
 using CavemanTools.Logging;
+using Serilog;
 using Xunit;
 using Xunit.Abstractions;
 using Utils = DominoEventStore.Utils;
@@ -16,10 +17,13 @@ namespace Tests
 {
     public static class Setup
     {
-        public static readonly EventStoreSettings EventStoreSettings=new EventStoreSettings()
+        public static EventStoreSettings EventStoreSettings(ITestOutputHelper h)
         {
+
+            var f = new EventStoreSettings(new LoggerConfiguration().MinimumLevel.Debug().WriteTo.TestOutput(h).CreateLogger());
             
-        };
+            return f;
+        }
 
         public const string TestSchema = "";
 
@@ -40,6 +44,7 @@ namespace Tests
             ProviderExtensions.RegisterSqlFuConfig(f.Configuration);
             
             f.Configuration.UseLogManager();
+           Log.Logger=new LoggerConfiguration().MinimumLevel.Debug().WriteTo.TestOutput(t).CreateLogger();
            LogManager.OutputTo(t.WriteLine);
            return provs[f.Provider.ProviderId];
        }

@@ -22,7 +22,7 @@ namespace Tests
         {
             _h = h;
             _storage = Substitute.For<ISpecificDbStorage>();
-            _sut = new StoreFacade(_storage, Setup.EventStoreSettings);
+            _sut = new StoreFacade(_storage, Setup.EventStoreSettings(h));
             _config=new ReadModelGenerationConfig("test");            
         }
 

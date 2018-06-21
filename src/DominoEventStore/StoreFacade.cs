@@ -34,8 +34,14 @@ namespace DominoEventStore
             if (events.IsNullOrEmpty()) return ;
 
             var commit=new UnversionedCommit(tenantId,entityId,Utils.PackEvents(events),commitId,DateTimeOffset.Now);
+            var dbgInfo = new{tenantId,entityId,commitId};
+            _settings.Logger.Debug("Appending {@commit} with events {@events}",dbgInfo,events);
             var rez= await _store.Append(commit);
-            if (rez.WasSuccessful) return;
+            if (rez.WasSuccessful)
+            {
+                _settings.Logger.Debug("Append succesful for commit {@commit}",dbgInfo);
+                return;
+            }
             throw new DuplicateCommitException(commitId,Utils.UnpackEvents(commit.Timestamp,commit.EventData,_settings.EventMappers));
         }
 
@@ -64,11 +70,13 @@ namespace DominoEventStore
         public IAdvancedFeatures Advanced => this;
 
 
-        public Task Store(int entityVersion, Guid entityId, object memento, string tenantId = EventStore.DefaultTenant)
+        public async Task Store(int entityVersion, Guid entityId, object memento, string tenantId = EventStore.DefaultTenant)
         {
             var snapshot=new Snapshot(entityVersion,entityId,tenantId,Utils.PackSnapshot(memento),DateTimeOffset.Now);
-            return _store.Store(snapshot);
-            
+            _settings.Logger.Debug("Storing snapshot {@snapshot}",snapshot);
+            await _store.Store(snapshot).ConfigureFalse();
+
+            _settings.Logger.Debug("Snapshot for {@entity} stored successfully",new{entityId,tenantId,entityVersion});
         }
 
         public Task Delete(Guid entityId, int entityVersion, string tenantId = EventStore.DefaultTenant)
@@ -86,11 +94,23 @@ namespace DominoEventStore
     
         public async Task<Optional<EntityEvents>> GetEvents(Action<IConfigureQuery> advancedConfig, CancellationToken? token = null)
         {
-            var config = new QueryConfig();
-
+            var config = new QueryConfig();        
             advancedConfig(config);
+            _settings.Logger.Debug("Getting events with query {@query}",new{config.TenantId,config.EntityId,config.IgnoreSnapshots,config.DateStart,config.DateEnd});
             var raw = await _store.GetData(config, token ?? CancellationToken.None).ConfigureFalse();
-            return raw.HasValue ? new Optional<EntityEvents>(ConvertToEntityEvents(raw.Value)) : Optional<EntityEvents>.Empty;
+            var dbg = new{config.TenantId,config.EntityId};
+            if (raw.HasValue)
+            {
+                var events = ConvertToEntityEvents(raw.Value);
+                _settings.Logger.Debug("Query for {@entity} returned "+events.Count+" events",dbg);
+                
+                return new Optional<EntityEvents>(events);
+            }
+            else
+            {                
+                _settings.Logger.Debug("Query for {@entity} returned empty",dbg);
+                return Optional<EntityEvents>.Empty;
+            }
         }
 
 
@@ -99,17 +119,19 @@ namespace DominoEventStore
           name.MustNotBeEmpty();
           var conf = new MigrationConfig(name);
           config?.Invoke(conf);
+          var l = _settings.Logger;
 
          var rew=new EventsRewriter(conf.Converters,_settings.EventMappers);
-
+            l.Debug("Starting store migration with batch operation: {name}",name);
          using (var operation = new BatchOperation(_store, conf))
-          {
+          {              
               Optional<Commit> commit;
               do
               {
                   commit = operation.GetNextCommit();
                   if (commit.HasValue)
                   {
+                      l.Debug("Importing commit {commit}",commit.Value.CommitId);
                       newStorage.Advanced.ImportCommit(rew.Rewrite(commit.Value));
                   }
                   
@@ -117,7 +139,7 @@ namespace DominoEventStore
 
 
           }
-
+          l.Debug("Migration {name} completed",name);
    
       }
 

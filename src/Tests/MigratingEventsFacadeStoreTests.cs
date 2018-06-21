@@ -7,6 +7,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using DominoEventStore;
 using NSubstitute;
+using Xunit.Abstractions;
 
 
 namespace Tests
@@ -16,14 +17,16 @@ namespace Tests
         private ISpecificDbStorage _store;
         private StoreFacade _sut;
         private IStoreEvents _dest;
-        private EventStoreSettings _settings= new EventStoreSettings();
+      //  private EventStoreSettings _settings= new EventStoreSettings();
         private FakeImport _importer;
         private List<object> _events;
         private CommittedEvents _commits;
+        private EventStoreSettings _settings;
 
-        public MigratingEventsFacadeStoreTests()
+        public MigratingEventsFacadeStoreTests(ITestOutputHelper h)
         {
             _store = Substitute.For<ISpecificDbStorage>();
+            _settings = Setup.EventStoreSettings(h);
             _sut = new StoreFacade(_store, _settings);
             _dest = Substitute.For<IStoreEvents>();
             _importer=new FakeImport();
