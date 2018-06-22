@@ -18,11 +18,11 @@ It sits on top of an existing RDBMS (SqlServer, Sqlite), providing an event stor
 
 ## Usage
 
-Configuration is done inside the `Build` function. At a minimum you need to specify what db provider to use.
+Configuration is done inside the `Build` function. At a minimum you need to specify what db provider to use. DominoES uses Serilog for its logging, but you still have to specify sinks.
 
 ```csharp
 //create and configure the event store singleton . Add it as singleton to your favourite DI Container
-var eventStore=EventStore.Build(c =>
+var eventStore=EventStore.WithLogger(c=>/* configure Serilog */).Build(c =>
                     {
                         c.UseMSSql(SqlClientFactory.Instance.CreateConnection,ConnectionString);
                         //or
