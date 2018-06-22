@@ -19,10 +19,16 @@ namespace Tests
     {
         public static EventStoreSettings EventStoreSettings(ITestOutputHelper h)
         {
-
-            var f = new EventStoreSettings(new LoggerConfiguration().MinimumLevel.Debug().WriteTo.TestOutput(h).CreateLogger());
+            Logger(h);
+            
+            var f = new EventStoreSettings();
             
             return f;
+        }
+
+        public static void Logger(ITestOutputHelper h)
+        {
+            EventStore.WithLogger(c => c.WriteTo.TestOutput(h));
         }
 
         public const string TestSchema = "";

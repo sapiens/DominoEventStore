@@ -21,8 +21,9 @@ namespace DominoEventStore.Providers
         protected ASqlDbProvider(IDbFactory db)
         {
             _db = db;
-           
-            
+
+            db.Configuration.OnCommand = cmd => EventStore.Logger.Debug(cmd.FormatCommand());
+            db.Configuration.OnException = (cmd,ex) => EventStore.Logger.Debug(ex,cmd.FormatCommand());
         }
 
 

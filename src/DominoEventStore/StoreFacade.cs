@@ -35,11 +35,11 @@ namespace DominoEventStore
 
             var commit=new UnversionedCommit(tenantId,entityId,Utils.PackEvents(events),commitId,DateTimeOffset.Now);
             var dbgInfo = new{tenantId,entityId,commitId};
-            _settings.Logger.Debug("Appending {@commit} with events {@events}",dbgInfo,events);
+           EventStore.Logger.Debug("Appending {@commit} with events {@events}",dbgInfo,events);
             var rez= await _store.Append(commit);
             if (rez.WasSuccessful)
             {
-                _settings.Logger.Debug("Append succesful for commit {@commit}",dbgInfo);
+               EventStore.Logger.Debug("Append succesful for commit {@commit}",dbgInfo);
                 return;
             }
             throw new DuplicateCommitException(commitId,Utils.UnpackEvents(commit.Timestamp,commit.EventData,_settings.EventMappers));
@@ -73,10 +73,10 @@ namespace DominoEventStore
         public async Task Store(int entityVersion, Guid entityId, object memento, string tenantId = EventStore.DefaultTenant)
         {
             var snapshot=new Snapshot(entityVersion,entityId,tenantId,Utils.PackSnapshot(memento),DateTimeOffset.Now);
-            _settings.Logger.Debug("Storing snapshot {@snapshot}",snapshot);
+           EventStore.Logger.Debug("Storing snapshot {@snapshot}",snapshot);
             await _store.Store(snapshot).ConfigureFalse();
 
-            _settings.Logger.Debug("Snapshot for {@entity} stored successfully",new{entityId,tenantId,entityVersion});
+           EventStore.Logger.Debug("Snapshot for {@entity} stored successfully",new{entityId,tenantId,entityVersion});
         }
 
         public Task Delete(Guid entityId, int entityVersion, string tenantId = EventStore.DefaultTenant)
@@ -96,19 +96,19 @@ namespace DominoEventStore
         {
             var config = new QueryConfig();        
             advancedConfig(config);
-            _settings.Logger.Debug("Getting events with query {@query}",new{config.TenantId,config.EntityId,config.IgnoreSnapshots,config.DateStart,config.DateEnd});
+           EventStore.Logger.Debug("Getting events with query {@query}",new{config.TenantId,config.EntityId,config.IgnoreSnapshots,config.DateStart,config.DateEnd});
             var raw = await _store.GetData(config, token ?? CancellationToken.None).ConfigureFalse();
             var dbg = new{config.TenantId,config.EntityId};
             if (raw.HasValue)
             {
                 var events = ConvertToEntityEvents(raw.Value);
-                _settings.Logger.Debug("Query for {@entity} returned "+events.Count+" events",dbg);
+               EventStore.Logger.Debug("Query for {@entity} returned "+events.Count+" events",dbg);
                 
                 return new Optional<EntityEvents>(events);
             }
             else
             {                
-                _settings.Logger.Debug("Query for {@entity} returned empty",dbg);
+               EventStore.Logger.Debug("Query for {@entity} returned empty",dbg);
                 return Optional<EntityEvents>.Empty;
             }
         }
@@ -119,7 +119,7 @@ namespace DominoEventStore
           name.MustNotBeEmpty();
           var conf = new MigrationConfig(name);
           config?.Invoke(conf);
-          var l = _settings.Logger;
+          var l =EventStore.Logger;
 
          var rew=new EventsRewriter(conf.Converters,_settings.EventMappers);
             l.Debug("Starting store migration with batch operation: {name}",name);
@@ -143,12 +143,17 @@ namespace DominoEventStore
    
       }
 
-      public void ResetStorage() => _store.ResetStorage();
+      public void ResetStorage()
+      {
+          EventStore.Logger.Debug("Resetting events store");
+          _store.ResetStorage();
+      }
 
-        public void DeleteTenant(string tenantId)
+      public void DeleteTenant(string tenantId)
         {
             tenantId.MustNotBe(EventStore.DefaultTenant);
          _store.DeleteTenant(tenantId);
+          EventStore.Logger.Debug("Tenant {tenant} deleted",tenantId);
         }
 
       public void GenerateReadModel(string operationName, Action<dynamic> modelUpdater, Action<IConfigReadModelGeneration> config = null)
@@ -162,7 +167,8 @@ namespace DominoEventStore
               var evs = Utils.UnpackEvents(commit.Timestamp, commit.EventData, _settings.EventMappers);
               foreach (var ev in evs)
               {
-                    updater((dynamic) ev);                    
+                  EventStore.Logger.Debug("Updating readmodel from {@event}",ev);  
+                  updater((dynamic) ev);                    
               }
             }
           

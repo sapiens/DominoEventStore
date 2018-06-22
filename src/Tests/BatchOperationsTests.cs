@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using DominoEventStore;
 using NSubstitute;
+using Xunit.Abstractions;
 
 
 namespace Tests
@@ -14,8 +15,9 @@ namespace Tests
         private BatchOperation _sut;
         private IStoreBatchProgress _store;
 
-        public BatchOperationsTests()
+        public BatchOperationsTests(ITestOutputHelper h)
         {
+            Setup.Logger(h);
             _store = Substitute.For<IStoreBatchProgress>();
             _sut = new BatchOperation(_store,CreateReadModelConfig());
             ConfigureStore();
