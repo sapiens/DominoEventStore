@@ -28,7 +28,8 @@ namespace Tests
 
         public static void Logger(ITestOutputHelper h)
         {
-            EventStore.WithLogger(c => c.WriteTo.TestOutput(h));
+            var l = new LoggerConfiguration().MinimumLevel.Debug().WriteTo.TestOutput(h).CreateLogger();
+            EventStore.WithLogger(l);
         }
 
         public const string TestSchema = "";
