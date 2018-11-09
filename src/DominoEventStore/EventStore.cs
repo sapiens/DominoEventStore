@@ -1,5 +1,4 @@
 using System;
-using CavemanTools.Logging;
 using Serilog;
 
 namespace DominoEventStore
@@ -8,6 +7,14 @@ namespace DominoEventStore
     {
         public const string DefaultTenant = "_";
 
+        public static EventStore WithLogger(ILogger logger)
+        {
+            logger.MustNotBeNull();
+            Logger = logger.ForContext<EventStore>();
+            return new EventStore();
+        }
+
+        [Obsolete("Will be removed in the next iteration. Use the other overload",false)]
         public static EventStore WithLogger(Action<LoggerConfiguration> cfg, LoggerConfiguration existing = null)
         {
             existing=existing??new LoggerConfiguration();
