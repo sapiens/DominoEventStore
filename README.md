@@ -22,7 +22,7 @@ Configuration is done inside the `Build` function. At a minimum you need to spec
 
 ```csharp
 //create and configure the event store singleton . Add it as singleton to your favourite DI Container
-var eventStore=EventStore.WithLogger(c=>/* configure Serilog */).Build(c =>
+var eventStore=EventStore.WithLogger(/* Serilog instance */).Build(c =>
                     {
                         c.UseMSSql(SqlClientFactory.Instance.CreateConnection,ConnectionString);
                         //or
