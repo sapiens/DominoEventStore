@@ -37,23 +37,23 @@ namespace Tests
             
         }
 
-        [Fact]
-        public async Task mini_benchmark()
-        {
-            LogManager.OutputTo(f => { });
-            var s = new Stopwatch();
-            var arr = Enumerable.Range(1, 1000).Select(d => Setup.UnversionedCommit()).ToArray();
+        //[Fact]
+        //public async Task mini_benchmark()
+        //{
+        //    LogManager.OutputTo(f => { });
+        //    var s = new Stopwatch();
+        //    var arr = Enumerable.Range(1, 1000).Select(d => Setup.UnversionedCommit()).ToArray();
 
             
-            s.Start();
-            //Parallel.For(1, 1000, async (i, state) =>
-            //{
-            //    await _store.Append(arr[i - 1]);
-            //});
-            foreach (var g in arr) await _store.Append(g);
-            s.Stop();
-            _t.WriteLine($"1000 commits in {s.ElapsedMilliseconds}ms");
-        }
+        //    s.Start();
+        //    //Parallel.For(1, 1000, async (i, state) =>
+        //    //{
+        //    //    await _store.Append(arr[i - 1]);
+        //    //});
+        //    foreach (var g in arr) await _store.Append(g);
+        //    s.Stop();
+        //    _t.WriteLine($"1000 commits in {s.ElapsedMilliseconds}ms");
+        //}
 
         [Fact]
         public async Task append_then_get_events_no_snapshot()
