@@ -51,8 +51,8 @@ namespace Tests
             ProviderExtensions.RegisterSqlFuConfig(f.Configuration);
             
             f.Configuration.UseLogManager();
-           Log.Logger=new LoggerConfiguration().MinimumLevel.Debug().WriteTo.TestOutput(t).CreateLogger();
-           LogManager.OutputTo(t.WriteLine);
+           Log.Logger=new LoggerConfiguration().MinimumLevel.Error().WriteTo.TestOutput(t).CreateLogger();
+          // LogManager.OutputTo(t.WriteLine);
            return provs[f.Provider.ProviderId];
        }
 

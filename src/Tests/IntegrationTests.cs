@@ -22,7 +22,7 @@ namespace Tests
 {
     public class IntegrationTests:IDisposable
     {
-        private static int MaxEntities = Setup.IsAppVeyor?30:500;
+        private static int MaxEntities = Setup.IsAppVeyor?10:10;
         private IStoreEvents _dest;
         private IStoreEvents _src;
         Fixture _fixture=new Fixture();
