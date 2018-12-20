@@ -18,10 +18,11 @@ CREATE TABLE if not exists `{CommitsTable}`(
 `Id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT
 , `TenantId` TEXT NOT NULL
 , `EntityId` TEXT NOT NULL
-, `CommitId` TEXT NOT NULL UNIQUE
+, `CommitId` TEXT NOT NULL 
 , `EventData` TEXT NOT NULL
 , `Timestamp` TEXT NOT NULL
 , `Version` INTEGER NOT NULL 
+, unique (`EntityId`,'CommitId')
                );
 CREATE INDEX if not exists `IX_Commits_Cid` ON `{CommitsTable}` (`CommitId` ASC);
 CREATE INDEX if not exists `IX_Commits_Ver` ON `{CommitsTable}` (`EntityId` ,`Version` );
