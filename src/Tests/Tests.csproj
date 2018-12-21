@@ -7,7 +7,7 @@
     <StartupObject />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>TRACE;DEBUG;NETCOREAPP2_0; IN_MEMORY</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;NETCOREAPP2_1; </DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="AutoFixture" Version="4.4.0" />
