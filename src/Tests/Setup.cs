@@ -77,9 +77,9 @@ namespace Tests
             return Utils.UnpackEvents(commit.Timestamp, commit.EventData, upc);
         }
 
-        public static UnversionedCommit UnversionedCommit(string tenantId = "_", Guid? guid = null)
+        public static UnversionedCommit UnversionedCommit(string tenantId = "_", Guid? entityId = null,Guid? commit=null)
             =>
-                new UnversionedCommit(tenantId, guid ?? Guid.NewGuid(), Utils.PackEvents(Events(1)), Guid.NewGuid(),
+                new UnversionedCommit(tenantId, entityId ?? Guid.NewGuid(), Utils.PackEvents(Events(1)), commit??Guid.NewGuid(),
                     DateTimeOffset.Now);
         
 
