@@ -22,10 +22,9 @@ CREATE TABLE if not exists `{CommitsTable}`(
 , `EventData` TEXT NOT NULL
 , `Timestamp` TEXT NOT NULL
 , `Version` INTEGER NOT NULL 
-, unique (`EntityId`,'CommitId')
                );
-CREATE INDEX if not exists `IX_Commits_Cid` ON `{CommitsTable}` (`CommitId` ASC);
-CREATE INDEX if not exists `IX_Commits_Ver` ON `{CommitsTable}` (`EntityId` ,`Version` );
+CREATE unique INDEX if not exists `IX_Commits_Cid` ON `{CommitsTable}` (`EntityId`,`CommitId` ASC);
+CREATE unique INDEX if not exists `IX_Commits_Ver` ON `{CommitsTable}` (`EntityId` ,`Version` );
 
 CREATE TABLE if not exists `{SnapshotsTable}` 
 ( 
