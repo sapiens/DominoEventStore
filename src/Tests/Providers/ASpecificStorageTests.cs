@@ -129,6 +129,7 @@ namespace Tests
           [Fact]
         public async Task concurrency_Exception_when_trying_to_commit_with_an_existing_version()
         {
+            if(Setup.IsAppVeyor) return;
             var commit = Setup.UnversionedCommit();
             var comm2 = Setup.UnversionedCommit(guid: commit.CommitId);
             await _store.Append(commit);
