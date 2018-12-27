@@ -36,6 +36,14 @@ var eventStore=EventStore.WithLogger(/* Serilog instance */).Build(c =>
 //add events
 await _store.Append(myEntityId,commitId,myEvents);
 
+//commit events from more than one aggregate
+  using (var t=_store.StartCommit(commitId))
+            {
+                t.Append(entity1,events1);
+                t.Append(entity2,events2);
+                await t.Complete().ConfigureFalse();
+            }
+
 //query events
 var evs=await _store.GetEvents(myEntityId);
 
