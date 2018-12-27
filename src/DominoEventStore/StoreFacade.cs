@@ -33,16 +33,59 @@ namespace DominoEventStore
             commitId.MustNotBeDefault();
             if (events.IsNullOrEmpty()) return ;
 
-            var commit=new UnversionedCommit(tenantId,entityId,Utils.PackEvents(events),commitId,DateTimeOffset.Now);
-            var dbgInfo = new{tenantId,entityId,commitId};
-           EventStore.Logger.Debug("Appending {@commit} with events {@events}",dbgInfo,events);
-            var rez= await _store.Append(commit);
-            if (rez.WasSuccessful)
+            using (var t=StartCommit(commitId))
             {
-               EventStore.Logger.Debug("Append succesful for commit {@commit}",dbgInfo);
-                return;
+                t.Append(tenantId,entityId,events);
+                await t.Complete().ConfigureFalse();
             }
-            throw new DuplicateCommitException(commitId,Utils.UnpackEvents(commit.Timestamp,commit.EventData,_settings.EventMappers));
+
+           // var commit=new UnversionedCommit(tenantId,entityId,Utils.PackEvents(events),commitId,DateTimeOffset.Now);
+           // var dbgInfo = new{tenantId,entityId,commitId};
+           //EventStore.Logger.Debug("Appending {@commit} with events {@events}",dbgInfo,events);
+           // var rez= await _store.Append(commit);
+           // if (rez.WasSuccessful)
+           // {
+           //    EventStore.Logger.Debug("Append successful for commit {@commit}",dbgInfo);
+           //     return;
+           // }
+           // throw new DuplicateCommitException(commitId,Utils.UnpackEvents(commit.Timestamp,commit.EventData,_settings.EventMappers));
+        }
+
+        public IStoreUnitOfWork StartCommit(Guid id)
+        {
+            return new UnitOfWork(id,_store);
+        }
+
+        class UnitOfWork : IStoreUnitOfWork
+        {
+            private readonly Guid _commitId;
+            private readonly ISpecificDbStorage _store;
+            List<UnversionedCommit> _commits= new List<UnversionedCommit>();
+
+            public UnitOfWork(Guid commitId,ISpecificDbStorage store)
+            {
+                _commitId = commitId;
+                _store = store;
+            }
+            public void Dispose()
+            {
+               
+            }
+
+            public void Append(string tenantId, Guid entityId, params object[] events)
+            {
+               _commits.Add(new UnversionedCommit(tenantId,entityId,Utils.PackEvents(events),_commitId, DateTimeOffset.Now));
+            }
+
+            public void Append(Guid entityId, params object[] events)
+            {
+               Append(EventStore.DefaultTenant,entityId,events);
+            }
+
+            public Task Complete()
+            {
+                return _store.Append(_commits.ToArray());
+            }
         }
 
         public Task<Optional<EntityEvents>> GetEvents(Guid entityId, string tenantId = EventStore.DefaultTenant,

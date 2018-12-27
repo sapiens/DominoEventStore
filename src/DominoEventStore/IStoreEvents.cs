@@ -20,6 +20,8 @@ namespace DominoEventStore
         Task Append(Guid entityId,Guid commitId,params object[] events);
         Task Append(string tenantId,Guid entityId,Guid commitId,params object[] events);
 
+        IStoreUnitOfWork StartCommit(Guid id);
+
         /// <summary>
         /// Gets all the events from the beginning until present unless overriden. 
         /// For performance reasons, by default it doesn't check for snapshots.

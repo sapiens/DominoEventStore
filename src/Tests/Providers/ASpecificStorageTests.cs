@@ -114,17 +114,7 @@ namespace Tests
             commits.Length.Should().Be(0);            
         }
 
-        [Fact]
-        public async Task duplicate_commit_returns_stored_commit()
-        {
-            var commit1 = Setup.UnversionedCommit();
-            await _store.Append(commit1);
-
-            var result=await _store.Append(commit1);
-            result.WasSuccessful.Should().BeFalse();
-            result.DuplicateCommit.Should().BeEquivalentTo(new Commit(1,commit1),c=>c.Excluding(d=>d.Timestamp));            
-        }
-
+        
 #if !IN_MEMORY
           [Fact(Skip = "Needs to be rewritten")]
         public void concurrency_Exception_when_trying_to_commit_with_an_existing_version()

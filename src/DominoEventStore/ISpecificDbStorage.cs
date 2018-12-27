@@ -8,14 +8,22 @@ namespace DominoEventStore
 {
     public interface ISpecificDbStorage : IStoreBatchProgress
     {
+       // /// <summary>
+       // /// Should calculate the version of the entity and use that to detect concurrency problems.
+       // /// If commit id exists, the existing commit will be returned 
+       // /// </summary>
+       // /// <param name="commit"></param>
+       // /// <exception cref="ConcurrencyException"></exception>
+       ///// <returns></returns>
+       // Task<AppendResult> Append(UnversionedCommit commit);
         /// <summary>
-        /// Should calculate the version of the entity and use that to detect concurrency problems
+        /// Should calculate the versions of each entity and use that to detect concurrency problems.
         /// </summary>
-        /// <param name="commit"></param>
+        /// <param name="commits"></param>
         /// <exception cref="ConcurrencyException"></exception>
+        /// <exception cref="DuplicateCommitException"></exception>
         /// <returns></returns>
-        Task<AppendResult> Append(UnversionedCommit commit);
-
+        Task Append(params UnversionedCommit[] commits);
         /// <summary>
         /// Adds the commit as is. Duplicates should be ignored
         /// </summary>
@@ -47,5 +55,10 @@ namespace DominoEventStore
         /// <param name="entityVersion">If missing, it deletes all stored snapshots</param>
         /// <returns></returns>
         Task DeleteSnapshot(Guid entityId, string tenantId, int? entityVersion=null);
+    }
+
+    public interface IUnitOfWork : IDisposable
+    {
+        void Commit();
     }
 }

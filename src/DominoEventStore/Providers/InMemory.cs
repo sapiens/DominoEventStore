@@ -49,22 +49,26 @@ namespace DominoEventStore.Providers
 
         List<Commit> _commits=new List<Commit>();
 
-        public Task<AppendResult> Append(UnversionedCommit commit)
+        public Task Append(params UnversionedCommit[] commits)
         {
             lock (_sync)
             {
-                
-                var all = _commits.Where(d => d.TenantId == commit.TenantId && d.EntityId == commit.EntityId);
-                var dup = all.FirstOrDefault(d => d.CommitId == commit.CommitId);
-                if (dup != null)
+                foreach (var commit in commits)
                 {
-                    return Task.FromResult(new AppendResult(dup));
+                    var all = _commits.Where(d => d.TenantId == commit.TenantId && d.EntityId == commit.EntityId);
+                    var dup = all.FirstOrDefault(d => d.CommitId == commit.CommitId);
+                    if (dup != null)
+                    {
+                        return Task.FromResult(new AppendResult(dup));
+                    }
+                    var max=!all.Any()?0:all.Max(d => d.Version);
+                    var c=new Commit(max+1,commit);
+                    _commits.Add(c);
                 }
-                var max=!all.Any()?0:all.Max(d => d.Version);
-                var c=new Commit(max+1,commit);
-                _commits.Add(c);
+               
             }
-            return Task.FromResult(AppendResult.Ok);
+
+            return Task.CompletedTask;
         }
 
         public void Import(Commit commit)

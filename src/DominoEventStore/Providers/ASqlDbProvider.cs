@@ -95,42 +95,49 @@ namespace DominoEventStore.Providers
             }
         }
 
-        public async Task<AppendResult> Append(UnversionedCommit commit)
+        public async Task Append(params UnversionedCommit[] commits)
         {
             using (var db = await _db.CreateAsync(CancellationToken.None))
             {
-                using (var t = db.BeginTransaction())
+                try
                 {
-                    var max=await db.QueryValueAsync<int?>(q =>
-                        q.From<Commit>().Where(d => d.EntityId == commit.EntityId && d.TenantId == commit.TenantId)
-                            .Select(d => d.Max(d.Version)).MapTo<int?>(),CancellationToken.None).ConfigureFalse()??0;
-                    var com=new Commit(max+1,commit);
-                    try
+                    using (var t = db.BeginTransaction())
                     {
-                        await db.InsertAsync(com, CancellationToken.None).ConfigureFalse();
-                        t.Commit();
-                        return AppendResult.Ok;
-                    }
-                    catch (DbException ex) 
-                    {
-                        if (ex.Message.Contains(DuplicateCommmitMessage))
-                        {
-                            var existing = await db
-                                .QueryRowAsync<Commit>(
-                                    q => q.From<Commit>()
-                                        .Where(d =>d.CommitId==commit.CommitId && d.EntityId == commit.EntityId && d.TenantId == commit.TenantId)
-                                        .Limit(1)
-                                        .SelectAll(useAsterisk: true), CancellationToken.None).ConfigureFalse();
-                            return new AppendResult(existing);
-                        }
 
-                        if (ex.Message.Contains(DuplicateVersion))
+                        foreach (var commit in commits)
                         {
-                            throw new ConcurrencyException();
+                            var max=await db.QueryValueAsync<int?>(q =>
+                                        q.From<Commit>().Where(d => d.EntityId == commit.EntityId && d.TenantId == commit.TenantId)
+                                            .Select(d => d.Max(d.Version)).MapTo<int?>(),CancellationToken.None).ConfigureFalse()??0;
+                            var com=new Commit(max+1,commit);
+                            await db.InsertAsync(com, CancellationToken.None).ConfigureFalse();
                         }
-                        throw;
+                  
+                        t.Commit();                   
                     }
                 }
+
+                catch (DbException ex) 
+                {
+                    if (ex.Message.Contains(DuplicateCommmitMessage))
+                    {
+                        throw new DuplicateCommitException();
+                        //var existing = await db
+                        //    .QueryRowAsync<Commit>(
+                        //        q => q.From<Commit>()
+                        //            .Where(d =>d.CommitId==commit.CommitId && d.EntityId == commit.EntityId && d.TenantId == commit.TenantId)
+                        //            .Limit(1)
+                        //            .SelectAll(useAsterisk: true), CancellationToken.None).ConfigureFalse();
+                        //return new AppendResult(existing);
+                    }
+
+                    if (ex.Message.Contains(DuplicateVersion))
+                    {
+                        throw new ConcurrencyException();
+                    }
+                    throw;
+                }
+              
             }
         }
 
