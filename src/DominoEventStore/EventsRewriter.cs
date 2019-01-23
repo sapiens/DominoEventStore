@@ -58,7 +58,8 @@ namespace DominoEventStore
             public bool Handles(Type type)
                 => type == _type;
 
-            public object Map(dynamic existingData, object deserializedEvent, DateTimeOffset commitDate)
+            public object Map(IDictionary<string, object> existingData, object deserializedEvent,
+                DateTimeOffset commitDate)
             {
                 var rez= _mapr?.Map(existingData, deserializedEvent, commitDate)??deserializedEvent;
                 return _rew?.Rewrite(existingData, rez, commitDate) ?? rez;

@@ -13,6 +13,7 @@ using CavemanTools.Logging;
 using DominoEventStore;
 using NSubstitute.Exceptions;
 using Serilog;
+using Serilog.Core;
 using SqlFu;
 using SqlFu.Providers.SqlServer;
 using Xunit.Abstractions;
@@ -34,7 +35,7 @@ namespace Tests
         {
             
             
-            _dest = EventStore.WithLogger(d => d.WriteTo.TestOutput(h)).Build(c =>
+            _dest = EventStore.WithLogger(Logger.None).Build(c =>
             {
             
                 c.UseMSSql(SqlClientFactory.Instance.CreateConnection, SqlServerTests.ConnectionString);
@@ -42,7 +43,7 @@ namespace Tests
             });
 
             
-            _src = EventStore.WithLogger(d => d.WriteTo.TestOutput(h)).Build(c =>
+            _src = EventStore.WithLogger(Logger.None).Build(c =>
             {
                 c.UseSqlite(SQLiteFactory.Instance.CreateConnection, SqliteTests.ConnectionString);
                 

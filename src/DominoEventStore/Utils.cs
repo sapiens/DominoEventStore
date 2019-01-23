@@ -1,54 +1,64 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace DominoEventStore
 {
     public static class Utils
     {
-        class EventWrap
+        public class JsonWrap
         {
             public string Type { get; set; }
             public dynamic Data { get; set; }
+
+            public JsonWrap()
+            {
+                
+            }
+
+            public JsonWrap(object data)
+            {
+                data.MustNotBeNull();
+                Type = data.GetType().AssemblyQualifiedName;
+                Data = data;
+            }
         }
 
-       private static readonly JsonSerializerSettings SnapshotSerializerSettings = new JsonSerializerSettings()
+
+     public static string PackEvents(IEnumerable<object> events)
+            => ToJson(events.Select(d => new JsonWrap(d)));
+
+        public static IReadOnlyCollection<object> UnpackEvents(DateTimeOffset commitDate, string data, IReadOnlyDictionary<Type, IMapEventDataToObject> upcasters)
         {
-            Formatting = Formatting.Indented,
-            TypeNameHandling = TypeNameHandling.Objects,
-            DateFormatHandling = DateFormatHandling.IsoDateFormat
-        };
-
-        
-
-        public static string PackEvents(IEnumerable<object> events)
-            => JsonConvert.SerializeObject(events.Select(d=> new EventWrap() { Type = d.GetType().AssemblyQualifiedName, Data = d }),Formatting.Indented);
-
-        public static IReadOnlyCollection<object> UnpackEvents(DateTimeOffset commitDate,string data,IReadOnlyDictionary<Type,IMapEventDataToObject> upcasters)
-        {
-            var d = JsonConvert.DeserializeObject<EventWrap[]>(data);
+            var d = Utf8Json.JsonSerializer.Deserialize<JsonWrap[]>(data);
             return d.Select(c =>
             {
-                var jo = c.Data as JObject;
-                var type = Type.GetType(c.Type);
-                var des=jo.ToObject(type);
+                var des = DynamicToObject(c);
+                var type = des.GetType();
+                                    
                 upcasters.TryGetValue(type, out var upcast);
-                return upcast?.Map(c.Data, des, commitDate)?? des;                
-            }).ToArray();            
-            
+                return upcast?.Map(c.Data, des, commitDate) ?? des;
+            }).ToArray();
+
         }
+
+       
+        
+        static object DynamicToObject(JsonWrap w) =>
+            Utf8Json.JsonSerializer.NonGeneric.Deserialize(Type.GetType(w.Type), Utf8Json.JsonSerializer.NonGeneric.Serialize(w.Data));
+
+        static string ToJson(object o) => Utf8Json.JsonSerializer.PrettyPrint(Utf8Json.JsonSerializer.Serialize(o));
 
         public static string PackSnapshot(object memento)
         {
             memento.MustNotBeNull();
-            return JsonConvert.SerializeObject(memento, SnapshotSerializerSettings);
+            return ToJson(new JsonWrap(memento));            
         }
 
         public static object UnpackSnapshot(string snapData)
         {
-            return JsonConvert.DeserializeObject(snapData,SnapshotSerializerSettings);
+            var wrap = Utf8Json.JsonSerializer.Deserialize<JsonWrap>(snapData);
+            return DynamicToObject(wrap);            
         }
 
     }

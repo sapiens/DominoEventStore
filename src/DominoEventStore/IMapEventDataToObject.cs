@@ -1,11 +1,12 @@
 using System;
+using System.Collections.Generic;
 
 namespace DominoEventStore
 {
     public interface IMapEventDataToObject
     {
         bool Handles(Type type);
-        object Map(dynamic existingData, object deserializedEvent, DateTimeOffset commitDate);
+        object Map(IDictionary<string, object> existingData, object deserializedEvent, DateTimeOffset commitDate);
         
     }
 
@@ -18,6 +19,6 @@ namespace DominoEventStore
         /// <param name="deserializedEvent">Event instance containing values automatically deserialized from existing data</param>
         /// <param name="commitDate"></param>
         /// <returns></returns>
-        T Map(dynamic existingData, T deserializedEvent, DateTimeOffset commitDate);
+        T Map(IDictionary<string, object> existingData, T deserializedEvent, DateTimeOffset commitDate);
     }
 }

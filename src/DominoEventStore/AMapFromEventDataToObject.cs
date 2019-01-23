@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace DominoEventStore
 {
@@ -6,7 +7,7 @@ namespace DominoEventStore
     {
         public bool Handles(Type type)=> typeof(T) == type;
 
-        public object Map(dynamic existingData, object deserializedEvent, DateTimeOffset commitDate)
+        public object Map(IDictionary<string, object> existingData, object deserializedEvent, DateTimeOffset commitDate)
             => Map(existingData, deserializedEvent as T, commitDate);
 
         /// <summary>
@@ -17,6 +18,6 @@ namespace DominoEventStore
         /// <param name="deserializedEvent">Event with values automatically deserialized from the old data</param>
         /// <param name="commitDate"></param>
         /// <returns></returns>
-        public abstract T Map(dynamic existingData, T deserializedEvent, DateTimeOffset commitDate);
+        public abstract T Map(IDictionary<string, object> existingData, T deserializedEvent, DateTimeOffset commitDate);
     }
 }
