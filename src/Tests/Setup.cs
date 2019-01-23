@@ -4,7 +4,7 @@ using SqlFu;
 using SqlFu.Providers.SqlServer;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
+
 using System.Linq;
 using AutoFixture;
 using CavemanTools.Logging;
@@ -96,7 +96,7 @@ namespace Tests
 
         public static Func<Commit, IEnumerable<object>> EventDeserializerWIthoutUpcasting()
         {
-            return c=>c.GetEvents(ImmutableDictionary<Type, IMapEventDataToObject>.Empty);
+            return c=>c.GetEvents(new Dictionary<Type, IMapEventDataToObject>());
         }
     }
 

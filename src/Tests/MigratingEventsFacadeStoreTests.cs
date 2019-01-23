@@ -3,7 +3,7 @@ using FluentAssertions;
 using Xunit;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using System.Linq;
 using DominoEventStore;
 using NSubstitute;
@@ -81,7 +81,7 @@ namespace Tests
             _sut.Advanced.MigrateEventsTo(_dest,"m");
            _importer.Commits.Count.Should().Be(3);
             //we avoid double upcasting
-            var evs = _importer.Commits[0].GetEvents(ImmutableDictionary<Type, IMapEventDataToObject>.Empty);
+            var evs = _importer.Commits[0].GetEvents(new Dictionary<Type, IMapEventDataToObject>());
             evs.First().CastAs<Event1>().Nr.Should().Be(_events[0].CastAs<Event1>().Nr + 10);
             
         }
@@ -97,7 +97,7 @@ namespace Tests
             });
            _importer.Commits.Count.Should().Be(3);
             //we avoid double upcasting
-            var evs = _importer.Commits[0].GetEvents(ImmutableDictionary<Type, IMapEventDataToObject>.Empty);
+            var evs = _importer.Commits[0].GetEvents(new Dictionary<Type, IMapEventDataToObject>());
             var event1 = evs.First().CastAs<Event1>();
             event1.Nr.Should().Be(_events[0].CastAs<Event1>().Nr+10);
             event1.Name.Should().Be("rewritten");
@@ -113,7 +113,7 @@ namespace Tests
             });
            _importer.Commits.Count.Should().Be(3);
             //we avoid double upcasting
-            var evs = _importer.Commits[0].GetEvents(ImmutableDictionary<Type, IMapEventDataToObject>.Empty);
+            var evs = _importer.Commits[0].GetEvents(new Dictionary<Type, IMapEventDataToObject>());
             var event1 = evs.First().CastAs<Event1>();
             event1.Nr.Should().Be(_events[0].CastAs<Event1>().Nr);
             event1.Name.Should().Be("rewritten");
