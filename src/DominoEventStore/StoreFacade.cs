@@ -36,7 +36,7 @@ namespace DominoEventStore
             using (var t=StartCommit(commitId))
             {
                 t.Append(tenantId,entityId,events);
-                await t.Complete().ConfigureFalse();
+                await t.Commit().ConfigureFalse();
             }
 
            // var commit=new UnversionedCommit(tenantId,entityId,Utils.PackEvents(events),commitId,DateTimeOffset.Now);
@@ -82,7 +82,7 @@ namespace DominoEventStore
                Append(EventStore.DefaultTenant,entityId,events);
             }
 
-            public Task Complete()
+            public Task Commit()
             {
                 return _store.Append(_commits.ToArray());
             }

@@ -7,6 +7,6 @@ namespace DominoEventStore
     {
         void Append(string tenantId, Guid entityId, params object[] events);
         void Append(Guid entityId, params object[] events);
-        Task Complete();
+        Task Commit();
     }
 }
