@@ -16,6 +16,15 @@ It sits on top of an existing RDBMS (SqlServer, Sqlite), providing an event stor
 * Easy to setup/use
 * Great for small to medium non-distributed apps. 
 
+## Breaking Changes!
+
+1.0.0-beta8 -> 1.0.0-beta9
+
+* Changed how Snapshot data is serialiazed
+* Due to using a different json lib, currently stored events might not deserialize properly
+* Renamed the `Complete` method to `Commit`
+* Netstandard 2.0
+
 ## Usage
 
 Configuration is done inside the `Build` function. At a minimum you need to specify what db provider to use. DominoES uses Serilog for its logging, but you still have to specify sinks.
