@@ -1,12 +1,10 @@
-﻿using System;
+﻿using SqlFu;
+using SqlFu.Configuration;
+using System;
 using System.Data.Common;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CavemanTools.Logging;
-using SqlFu;
-using SqlFu.Configuration;
-using SqlFu.Providers.SqlServer;
 
 namespace DominoEventStore.Providers
 {
@@ -62,19 +60,16 @@ namespace DominoEventStore.Providers
 
         public CommittedEvents GetNextBatch(MigrationConfig config, ProcessedCommitsCount count)
         {
-            using (var db = _db.Create())
-            {
-                var all = db.QueryAs(q => q
-                    .FromAnonymous(new { Id = 1, TenantId = "", EntityId = Guid.Empty },
-                       new TableName(CommitsTable, Schema)).Where(d => true)
-                    
-                    .AndIf(() => !config.TenantId.IsNullOrEmpty(), d => d.TenantId == config.TenantId)
-                    .OrderBy(d => d.Id)
-                    .Limit(config.BatchSize, count.Value)
-                    .SelectAll(useAsterisk: true).MapTo<Commit>()
-                );
-                return new CommittedEvents(all.ToArray());
-            }
+            var all = _db.QueryOver(new {Id = 1, TenantId = "", EntityId = Guid.Empty},
+                new TableName(CommitsTable, Schema)).Build(q => 
+                q.Where(d => true)
+                .AndIf(() => !config.TenantId.IsNullOrEmpty(), d => d.TenantId == config.TenantId)
+                .OrderBy(d => d.Id)
+                .Limit(config.BatchSize, count.Value)
+                .SelectAll(useAsterisk: true).MapTo<Commit>())
+                .GetRows();
+            return new CommittedEvents(all.ToArray());
+           
         }
 
         public void UpdateProgress(string name, ProcessedCommitsCount processedCommits)
@@ -106,9 +101,14 @@ namespace DominoEventStore.Providers
 
                         foreach (var commit in commits)
                         {
-                            var max=await db.QueryValueAsync<int?>(q =>
-                                        q.From<Commit>().Where(d => d.EntityId == commit.EntityId && d.TenantId == commit.TenantId)
-                                            .Select(d => d.Max(d.Version)).MapTo<int?>(),CancellationToken.None).ConfigureFalse()??0;
+                            var max = await db.WithSql(q => 
+                                              q.From<Commit>()
+                                               .Where(d => d.EntityId == commit.EntityId && d.TenantId == commit.TenantId)
+                                              .Select(d => d.Max(d.Version))
+                                               .MapTo<int?>())
+                                          .GetValueAsync()
+                                          .ConfigureFalse() ?? 0;
+                            
                             var com=new Commit(max+1,commit);
                             await db.InsertAsync(com, CancellationToken.None).ConfigureFalse();
                         }
@@ -122,13 +122,7 @@ namespace DominoEventStore.Providers
                     if (ex.Message.Contains(DuplicateCommmitMessage))
                     {
                         throw new DuplicateCommitException();
-                        //var existing = await db
-                        //    .QueryRowAsync<Commit>(
-                        //        q => q.From<Commit>()
-                        //            .Where(d =>d.CommitId==commit.CommitId && d.EntityId == commit.EntityId && d.TenantId == commit.TenantId)
-                        //            .Limit(1)
-                        //            .SelectAll(useAsterisk: true), CancellationToken.None).ConfigureFalse();
-                        //return new AppendResult(existing);
+                       
                     }
 
                     if (ex.Message.Contains(DuplicateVersion))
@@ -211,6 +205,7 @@ namespace DominoEventStore.Providers
         public string Schema { get; set; }
         public void ResetStorage()
         {
+            
             using (var db = _db.Create())
             {
                 db.DeleteFrom<Commit>();

@@ -279,6 +279,7 @@ namespace Tests
         [Fact]
         public async Task batch_get_next_for_migration_all_events()
         {
+            LogManager.OutputToDebug();
             var entity = Guid.NewGuid();
             await _store.Append(Setup.UnversionedCommit(entityId: entity));
             await _store.Append(Setup.UnversionedCommit(entityId: entity));

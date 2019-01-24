@@ -13,11 +13,11 @@ namespace DominoEventStore
         {
             SqlFuManager.Configure(d=>
             {
-                d.AddProfile(new SqlServer2012Provider(factory), cnx, "mssql");
+                d.AddProfile(new SqlServer2012Provider(factory), cnx, "es_mssql");
                 RegisterSqlFuConfig(d, schema);
             });
             
-            var provider=new SqlServerProvider(SqlFuManager.GetDbFactory("mssql"));
+            var provider=new SqlServerProvider(SqlFuManager.GetDbFactory("es_mssql"));
             store.WithProvider(provider);
             return store;
         }
@@ -25,11 +25,11 @@ namespace DominoEventStore
         {
             SqlFuManager.Configure(d=>
             {
-                d.AddProfile(new SqlFu.Providers.Sqlite.SqliteProvider(factory), cnx, "sqlite");
+                d.AddProfile(new SqlFu.Providers.Sqlite.SqliteProvider(factory), cnx, "es_sqlite");
                 RegisterSqlFuConfig(d, schema);
             });
             
-            var provider=new SqliteProvider(SqlFuManager.GetDbFactory("sqlite"));
+            var provider=new SqliteProvider(SqlFuManager.GetDbFactory("es_sqlite"));
             store.WithProvider(provider);
             return store;
         }
