@@ -9,14 +9,14 @@ It sits on top of an existing RDBMS (SqlServer, Sqlite), providing an event stor
 
 ## Features
 
-* Domino ES is a netstandard 1.6 library, therefore it runs on multiple platforms such as .Net Core  and .Net Framework 4.6+
+* Domino ES is a netstandard 2.0 library, therefore it runs on multiple platforms such as .Net Core  and .Net Framework 4.6+
 * Multi-tenant support
 * Bulk read model generation assistance
 * Easy migrations and event data rewriting support (for those special cases)
 * Easy to setup/use
 * Great for small to medium non-distributed apps. 
 
-## Breaking Changes!
+## Beta Breaking Changes!
 
 1.0.0-beta8 -> 1.0.0-beta9
 
